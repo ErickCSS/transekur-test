@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ten Minutes Away
 
-## Getting Started
+Mini standalone version of the **"driver 10 minutes away"** client notice.
 
-First, run the development server:
+| App | Route | What it does |
+| --- | --- | --- |
+| Dispatch | `/dispatch` | Create a service (client, phone, date/time, pickup point), assign a driver, see when the notice went out. |
+| Driver app | `/driver` | Mobile web. Driver signs in, sees only their services for today, taps **I'm 10 min away**. |
+| Client phone | `/client` | Simulated phone inbox with the message (driver name + vehicle) and an **Open in WhatsApp** link. |
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Needs a `.env` with the Supabase project keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
+Create the driver test accounts once:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+node --env-file=.env scripts/seed-driver-accounts.mjs
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Demo accounts: see [supabase/seed-accounts.md](supabase/seed-accounts.md).
 
-## Learn More
+## Current status (Phase 1 — design)
 
-To learn more about Next.js, take a look at the following resources:
+- Driver login is real (Supabase Auth, cookie session, `proxy.ts`).
+- Services and notices live in a browser mock database (`localStorage`), shared by every open tab. Use **Reset demo data** in dispatch to start over.
+- Phase 2 moves services and notices to Supabase tables with Realtime.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Each feature is a module in `modules/` with its own `components`, `hooks`, `actions`, `services`, `config`, `data`, `types`. Routes in `app/` only mount a module screen. Details and decisions in [docs/](docs/README.md).
 
-## Deploy on Vercel
+## Tools used
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Next.js 16, React 19, Tailwind CSS 4, Supabase (free plan), Claude Code (AI pair programmer). See [docs/ai-usage.md](docs/ai-usage.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+All data is made up.

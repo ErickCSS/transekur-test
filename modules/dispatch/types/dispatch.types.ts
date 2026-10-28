@@ -1,0 +1,26 @@
+import type { Driver } from "@/modules/shared/types/shared-driver.types";
+import type { Notice } from "@/modules/shared/types/shared-notice.types";
+import type { Trip } from "@/modules/shared/types/shared-trip.types";
+
+export type DispatchTripRow = {
+  trip: Trip;
+  assignedDriver: Driver | null;
+  notice: Notice | null;
+};
+
+export type DispatchBoardSummary = {
+  totalTrips: number;
+  assignedTrips: number;
+  sentNotices: number;
+};
+
+export type DispatchTripFormValues = {
+  clientName: string;
+  clientPhone: string;
+  date: string;
+  time: string;
+  pickupPoint: string;
+  driverId: string;
+};
+
+export type DispatchTripFormErrors = Partial<Record<keyof DispatchTripFormValues, string>>;
