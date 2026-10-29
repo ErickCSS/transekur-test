@@ -4,8 +4,8 @@ import type { SignInDriverResult } from "../types/driver-auth.types";
 
 export async function signInDriverWithPassword(email: string, password: string): Promise<SignInDriverResult> {
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  return { errorMessage: error ? error.message : null };
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  return { errorMessage: error ? error.message : null, authUserId: data.user?.id ?? null };
 }
 
 export async function signOutDriver() {
@@ -13,10 +13,10 @@ export async function signOutDriver() {
   await supabase.auth.signOut();
 }
 
-// getClaims verifies the session JWT, so the email can be trusted.
-export async function getAuthenticatedDriverEmail(): Promise<string | null> {
+// getClaims verifies the session JWT, so the user id can be trusted.
+export async function getAuthenticatedDriverUserId(): Promise<string | null> {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getClaims();
-  const email = data?.claims.email;
-  return typeof email === "string" ? email : null;
+  const authUserId = data?.claims.sub;
+  return typeof authUserId === "string" ? authUserId : null;
 }

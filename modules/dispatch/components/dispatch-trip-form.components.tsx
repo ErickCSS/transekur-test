@@ -12,8 +12,15 @@ type DispatchTripFormProps = {
 };
 
 export function DispatchTripForm({ availableDrivers, onTripCreated }: DispatchTripFormProps) {
-  const { formValues, formErrors, confirmationMessage, updateFormField, submitDispatchTripForm } =
-    useDispatchTripForm(onTripCreated);
+  const {
+    formValues,
+    formErrors,
+    confirmationMessage,
+    submitErrorMessage,
+    isCreatingTrip,
+    updateFormField,
+    submitDispatchTripForm,
+  } = useDispatchTripForm(availableDrivers, onTripCreated);
 
   return (
     <form
@@ -79,9 +86,15 @@ export function DispatchTripForm({ availableDrivers, onTripCreated }: DispatchTr
         ))}
       </SharedSelectField>
 
-      <SharedButton type="submit" variant="accent" size="lg" isFullWidth>
-        Create service
+      <SharedButton type="submit" variant="accent" size="lg" isFullWidth disabled={isCreatingTrip}>
+        {isCreatingTrip ? "Creating…" : "Create service"}
       </SharedButton>
+
+      {submitErrorMessage ? (
+        <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+          {submitErrorMessage}
+        </p>
+      ) : null}
 
       {confirmationMessage ? (
         <p role="status" className="flex items-center gap-2 rounded-xl bg-success-soft px-3 py-2 text-sm font-medium text-success">

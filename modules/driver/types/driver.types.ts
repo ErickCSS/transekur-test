@@ -5,3 +5,7 @@ export type DriverTodayTrip = {
   trip: Trip;
   notice: Notice | null;
 };
+
+export type DriverNoticeActionResult = {
+  errorMessage: string | null;
+};

@@ -1,11 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { findMockDriverByAuthEmail } from "@/modules/shared/data/shared-drivers-mock.data";
+import { findDriverByAuthUserId } from "@/modules/shared/services/shared-drivers.services";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import { driverAuthRoutes } from "../config/driver-auth-routes.config";
 import {
-  getAuthenticatedDriverEmail,
+  getAuthenticatedDriverUserId,
   signInDriverWithPassword,
   signOutDriver,
 } from "../services/driver-auth.services";
@@ -22,12 +22,12 @@ export async function loginDriverWithEmail(
     return { errorMessage: "Enter your email and password.", submittedEmail: email };
   }
 
-  const { errorMessage } = await signInDriverWithPassword(email, password);
-  if (errorMessage) {
+  const { errorMessage, authUserId } = await signInDriverWithPassword(email, password);
+  if (errorMessage || !authUserId) {
     return { errorMessage: "Wrong email or password.", submittedEmail: email };
   }
 
-  if (!findMockDriverByAuthEmail(email)) {
+  if (!(await findDriverByAuthUserId(authUserId))) {
     await signOutDriver();
     return { errorMessage: "This account is not linked to a driver.", submittedEmail: email };
   }
@@ -41,8 +41,8 @@ export async function logoutDriver() {
 }
 
 export async function getCurrentDriver(): Promise<Driver> {
-  const authenticatedEmail = await getAuthenticatedDriverEmail();
-  const currentDriver = authenticatedEmail ? findMockDriverByAuthEmail(authenticatedEmail) : null;
+  const authUserId = await getAuthenticatedDriverUserId();
+  const currentDriver = authUserId ? await findDriverByAuthUserId(authUserId) : null;
   if (!currentDriver) redirect(driverAuthRoutes.signIn);
   return currentDriver;
 }

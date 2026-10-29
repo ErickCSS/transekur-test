@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { findMockDriverById } from "@/modules/shared/data/shared-drivers-mock.data";
+import { useState, useTransition, type ChangeEvent, type FormEvent } from "react";
+import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import { combineDateAndTimeInputs, toDateInputValue } from "@/modules/shared/utils/shared-date-format.utils";
 import { keepOnlyPhoneDigits } from "@/modules/shared/utils/shared-phone-format.utils";
-import { createDispatchTrip } from "../services/dispatch-trips.services";
+import { createDispatchTripAction } from "../actions/dispatch-trips.actions";
 import type { DispatchTripFormErrors, DispatchTripFormValues } from "../types/dispatch.types";
 
 function buildEmptyDispatchTripFormValues(): DispatchTripFormValues {
@@ -21,16 +21,22 @@ function validateDispatchTripForm(formValues: DispatchTripFormValues): DispatchT
   return formErrors;
 }
 
-export function useDispatchTripForm(onTripCreated: (scheduledDateInputValue: string) => void) {
+export function useDispatchTripForm(
+  availableDrivers: Driver[],
+  onTripCreated: (scheduledDateInputValue: string) => void,
+) {
   const [formValues, setFormValues] = useState(buildEmptyDispatchTripFormValues);
   const [formErrors, setFormErrors] = useState<DispatchTripFormErrors>({});
   const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
+  const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
+  const [isCreatingTrip, startCreatingTrip] = useTransition();
 
   function updateFormField(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = event.target;
     setFormValues((currentValues) => ({ ...currentValues, [name]: value }));
     setFormErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }));
     setConfirmationMessage(null);
+    setSubmitErrorMessage(null);
   }
 
   function submitDispatchTripForm(event: FormEvent<HTMLFormElement>) {
@@ -39,23 +45,37 @@ export function useDispatchTripForm(onTripCreated: (scheduledDateInputValue: str
     setFormErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
-    createDispatchTrip({
-      clientName: formValues.clientName.trim(),
-      clientPhone: keepOnlyPhoneDigits(formValues.clientPhone),
-      pickupPoint: formValues.pickupPoint.trim(),
-      scheduledAt: combineDateAndTimeInputs(formValues.date, formValues.time),
-      driverId: formValues.driverId || null,
-    });
+    startCreatingTrip(async () => {
+      const { errorMessage } = await createDispatchTripAction({
+        clientName: formValues.clientName.trim(),
+        clientPhone: keepOnlyPhoneDigits(formValues.clientPhone),
+        pickupPoint: formValues.pickupPoint.trim(),
+        scheduledAt: combineDateAndTimeInputs(formValues.date, formValues.time),
+        driverId: formValues.driverId || null,
+      });
+      if (errorMessage) {
+        setSubmitErrorMessage(errorMessage);
+        return;
+      }
 
-    const assignedDriver = findMockDriverById(formValues.driverId || null);
-    setConfirmationMessage(
-      assignedDriver
-        ? `Service created and assigned to ${assignedDriver.fullName}.`
-        : "Service created. Assign a driver from the list.",
-    );
-    onTripCreated(formValues.date);
-    setFormValues({ ...buildEmptyDispatchTripFormValues(), date: formValues.date });
+      const assignedDriver = availableDrivers.find((driver) => driver.id === formValues.driverId);
+      setConfirmationMessage(
+        assignedDriver
+          ? `Service created and assigned to ${assignedDriver.fullName}.`
+          : "Service created. Assign a driver from the list.",
+      );
+      onTripCreated(formValues.date);
+      setFormValues({ ...buildEmptyDispatchTripFormValues(), date: formValues.date });
+    });
   }
 
-  return { formValues, formErrors, confirmationMessage, updateFormField, submitDispatchTripForm };
+  return {
+    formValues,
+    formErrors,
+    confirmationMessage,
+    submitErrorMessage,
+    isCreatingTrip,
+    updateFormField,
+    submitDispatchTripForm,
+  };
 }

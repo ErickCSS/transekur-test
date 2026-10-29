@@ -5,4 +5,5 @@ export type DriverAuthLoginFormState = {
 
 export type SignInDriverResult = {
   errorMessage: string | null;
+  authUserId: string | null;
 };

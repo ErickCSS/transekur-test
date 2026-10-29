@@ -19,6 +19,7 @@ Documentación viva del proyecto. Todo dividido por tipo para encontrarlo rápid
 4. [0004 — Login del conductor con Supabase Auth](decisions/0004-login-conductor-supabase-auth.md)
 5. [0005 — Convenciones modulares](decisions/0005-convenciones-modulares.md)
 6. [0006 — Diseño primero con base de datos mock](decisions/0006-diseno-primero-con-mock.md)
+7. [0007 — Supabase tables behind server actions](decisions/0007-supabase-tables-server-actions.md)
 
 ## La prueba (resumen)
 

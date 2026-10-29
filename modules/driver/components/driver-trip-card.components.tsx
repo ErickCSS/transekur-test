@@ -6,10 +6,11 @@ import { DriverTenMinutesAwayButton } from "./driver-ten-minutes-away-button.com
 
 type DriverTripCardProps = {
   driverTodayTrip: DriverTodayTrip;
+  isSendingNotice: boolean;
   onTenMinutesAwayPressed: (tripId: string) => void;
 };
 
-export function DriverTripCard({ driverTodayTrip, onTenMinutesAwayPressed }: DriverTripCardProps) {
+export function DriverTripCard({ driverTodayTrip, isSendingNotice, onTenMinutesAwayPressed }: DriverTripCardProps) {
   const { trip, notice } = driverTodayTrip;
 
   return (
@@ -35,7 +36,11 @@ export function DriverTripCard({ driverTodayTrip, onTenMinutesAwayPressed }: Dri
         </p>
       </div>
 
-      <DriverTenMinutesAwayButton notice={notice} onTenMinutesAwayPressed={() => onTenMinutesAwayPressed(trip.id)} />
+      <DriverTenMinutesAwayButton
+        notice={notice}
+        isSending={isSendingNotice}
+        onTenMinutesAwayPressed={() => onTenMinutesAwayPressed(trip.id)}
+      />
     </li>
   );
 }

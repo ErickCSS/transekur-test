@@ -15,20 +15,21 @@ pnpm install
 pnpm dev
 ```
 
-Needs a `.env` with the Supabase project keys (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`).
-Create the driver test accounts once:
+Needs a `.env` with the Supabase project keys (copy [.env.example](.env.example)).
+Apply the schema in [supabase/migrations/](supabase/migrations/) (Supabase SQL editor or `supabase db push`), then create the driver test accounts once:
 
 ```bash
 node --env-file=.env scripts/seed-driver-accounts.mjs
 ```
 
-Demo accounts: see [supabase/seed-accounts.md](supabase/seed-accounts.md).
+Demo accounts: see [supabase/seed-accounts.md](supabase/seed-accounts.md). Use **Reset demo data** in dispatch to load today's sample services.
 
-## Current status (Phase 1 — design)
+## How it works
 
-- Driver login is real (Supabase Auth, cookie session, `proxy.ts`).
-- Services and notices live in a browser mock database (`localStorage`), shared by every open tab. Use **Reset demo data** in dispatch to start over.
-- Phase 2 moves services and notices to Supabase tables with Realtime.
+- Driver login with Supabase Auth (cookie session, `proxy.ts`).
+- Services, drivers and notices live in Supabase Postgres. Every read and write goes through the server (server actions); the tables have RLS on and are not reachable with the public key.
+- A driver only sees and can notify their own services for today. The notice and the service status change are written in one database function, and the database allows one notice per service.
+- "Today" and all times use the operation's time zone (`America/Santo_Domingo`).
 
 ## Structure
 

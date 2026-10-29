@@ -5,11 +5,16 @@ import { ArrowLeftIcon, MessageIcon } from "@/modules/shared/components/shared-i
 import { SharedEmptyState } from "@/modules/shared/components/shared-empty-state.components";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
 import { useClientNoticeInbox } from "../hooks/use-client-notice-inbox.hooks";
+import type { ClientNoticeInboxData } from "../types/client-notice.types";
 import { ClientNoticeMessageBubble } from "./client-notice-message-bubble.components";
 
-export function ClientNoticeInboxContent() {
+type ClientNoticeInboxContentProps = {
+  inboxData: ClientNoticeInboxData;
+};
+
+export function ClientNoticeInboxContent({ inboxData }: ClientNoticeInboxContentProps) {
   const { clientContacts, selectedClientPhone, selectedClientContact, selectedClientNotices, selectClientPhone } =
-    useClientNoticeInbox();
+    useClientNoticeInbox(inboxData);
 
   return (
     <>

@@ -1,55 +1,49 @@
-import type { Trip } from "../types/shared-trip.types";
+import { combineDateAndTimeInputs, toDateInputValue } from "../utils/shared-date-format.utils";
 
-type TripSeed = Omit<Trip, "scheduledAt" | "createdAt"> & { hour: number; minute: number };
+export type TripSeed = {
+  clientName: string;
+  clientPhone: string;
+  pickupPoint: string;
+  driverAuthEmail: string | null;
+  scheduledAt: string;
+};
 
-// Made-up clients and pickup points, always scheduled for "today".
-const todayTripSeeds: TripSeed[] = [
+// Made-up clients and pickup points, always scheduled for "today". Drivers are matched by email.
+const todayTripSeeds = [
   {
-    id: "trip-seed-1",
     clientName: "Ana Rodríguez",
     clientPhone: "18095550201",
     pickupPoint: "Las Américas Airport, Terminal B",
-    driverId: "driver-carlos-mendez",
-    status: "scheduled",
-    hour: 8,
-    minute: 30,
+    driverAuthEmail: "carlos.mendez@driver.test",
+    time: "08:30",
   },
   {
-    id: "trip-seed-2",
     clientName: "José Martínez",
     clientPhone: "18095550202",
     pickupPoint: "Hotel Jaragua, main lobby",
-    driverId: "driver-carlos-mendez",
-    status: "scheduled",
-    hour: 11,
-    minute: 0,
+    driverAuthEmail: "carlos.mendez@driver.test",
+    time: "11:00",
   },
   {
-    id: "trip-seed-3",
     clientName: "María Gómez",
     clientPhone: "18095550203",
     pickupPoint: "Ágora Mall, door 3",
-    driverId: "driver-laura-pena",
-    status: "scheduled",
-    hour: 15,
-    minute: 45,
+    driverAuthEmail: "laura.pena@driver.test",
+    time: "15:45",
   },
   {
-    id: "trip-seed-4",
     clientName: "Pedro Castillo",
     clientPhone: "18095550204",
     pickupPoint: "Calle El Conde 101, Zona Colonial",
-    driverId: null,
-    status: "scheduled",
-    hour: 18,
-    minute: 20,
+    driverAuthEmail: null,
+    time: "18:20",
   },
 ];
 
-export function buildTodayTripsSeed(today: Date): Trip[] {
-  return todayTripSeeds.map(({ hour, minute, ...trip }) => {
-    const scheduledAt = new Date(today);
-    scheduledAt.setHours(hour, minute, 0, 0);
-    return { ...trip, scheduledAt: scheduledAt.toISOString(), createdAt: today.toISOString() };
-  });
+export function buildTodayTripsSeed(today: Date): TripSeed[] {
+  const todayInputValue = toDateInputValue(today);
+  return todayTripSeeds.map(({ time, ...tripSeed }) => ({
+    ...tripSeed,
+    scheduledAt: combineDateAndTimeInputs(todayInputValue, time),
+  }));
 }

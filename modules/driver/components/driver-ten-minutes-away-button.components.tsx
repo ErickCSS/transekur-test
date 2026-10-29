@@ -5,10 +5,11 @@ import { formatTimeOfDay } from "@/modules/shared/utils/shared-date-format.utils
 
 type DriverTenMinutesAwayButtonProps = {
   notice: Notice | null;
+  isSending: boolean;
   onTenMinutesAwayPressed: () => void;
 };
 
-export function DriverTenMinutesAwayButton({ notice, onTenMinutesAwayPressed }: DriverTenMinutesAwayButtonProps) {
+export function DriverTenMinutesAwayButton({ notice, isSending, onTenMinutesAwayPressed }: DriverTenMinutesAwayButtonProps) {
   if (notice) {
     return (
       <div className="flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-success-soft text-sm font-semibold text-success">
@@ -19,9 +20,9 @@ export function DriverTenMinutesAwayButton({ notice, onTenMinutesAwayPressed }: 
   }
 
   return (
-    <SharedButton variant="accent" size="lg" isFullWidth onClick={onTenMinutesAwayPressed}>
+    <SharedButton variant="accent" size="lg" isFullWidth disabled={isSending} onClick={onTenMinutesAwayPressed}>
       <ClockIcon />
-      I&apos;m 10 min away
+      {isSending ? "Notifying client…" : "I'm 10 min away"}
     </SharedButton>
   );
 }

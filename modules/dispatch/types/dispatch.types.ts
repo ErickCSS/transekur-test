@@ -2,6 +2,16 @@ import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import type { Notice } from "@/modules/shared/types/shared-notice.types";
 import type { Trip } from "@/modules/shared/types/shared-trip.types";
 
+export type DispatchBoardData = {
+  drivers: Driver[];
+  trips: Trip[];
+  notices: Notice[];
+};
+
+export type DispatchActionResult = {
+  errorMessage: string | null;
+};
+
 export type DispatchTripRow = {
   trip: Trip;
   assignedDriver: Driver | null;

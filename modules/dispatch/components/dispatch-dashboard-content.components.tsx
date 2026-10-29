@@ -6,8 +6,13 @@ import { useDispatchTripsBoard } from "../hooks/use-dispatch-trips-board.hooks";
 import { DispatchSummaryStats } from "./dispatch-summary-stats.components";
 import { DispatchTripForm } from "./dispatch-trip-form.components";
 import { DispatchTripsList } from "./dispatch-trips-list.components";
+import type { DispatchBoardData } from "../types/dispatch.types";
 
-export function DispatchDashboardContent() {
+type DispatchDashboardContentProps = {
+  boardData: DispatchBoardData;
+};
+
+export function DispatchDashboardContent({ boardData }: DispatchDashboardContentProps) {
   const {
     availableDrivers,
     selectedDateInputValue,
@@ -15,10 +20,12 @@ export function DispatchDashboardContent() {
     todayLabel,
     selectedDayTripRows,
     selectedDaySummary,
+    boardErrorMessage,
+    isResettingDemoData,
     changeSelectedDate,
     assignDriverFromBoard,
     resetDemoData,
-  } = useDispatchTripsBoard();
+  } = useDispatchTripsBoard(boardData);
 
   return (
     <div className="flex flex-col gap-8">
@@ -27,8 +34,8 @@ export function DispatchDashboardContent() {
         title="Pickup board"
         description={todayLabel}
         actions={
-          <SharedButton variant="outline" onClick={resetDemoData}>
-            Reset demo data
+          <SharedButton variant="outline" onClick={resetDemoData} disabled={isResettingDemoData}>
+            {isResettingDemoData ? "Resetting…" : "Reset demo data"}
           </SharedButton>
         }
       />
@@ -52,6 +59,11 @@ export function DispatchDashboardContent() {
             />
           </div>
           <DispatchSummaryStats summary={selectedDaySummary} />
+          {boardErrorMessage ? (
+            <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+              {boardErrorMessage}
+            </p>
+          ) : null}
           <DispatchTripsList
             tripRows={selectedDayTripRows}
             availableDrivers={availableDrivers}

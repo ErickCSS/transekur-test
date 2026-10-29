@@ -2,17 +2,23 @@
 
 import { CarIcon } from "@/modules/shared/components/shared-icons.components";
 import { SharedEmptyState } from "@/modules/shared/components/shared-empty-state.components";
-import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import { useDriverTodayTrips } from "../hooks/use-driver-today-trips.hooks";
+import type { DriverTodayTrip } from "../types/driver.types";
 import { DriverTripCard } from "./driver-trip-card.components";
 
 type DriverTodayTripsContentProps = {
-  driver: Driver;
+  driverTodayTrips: DriverTodayTrip[];
 };
 
-export function DriverTodayTripsContent({ driver }: DriverTodayTripsContentProps) {
-  const { todayLabel, driverTodayTrips, pendingTripsCount, notifyClientDriverIsTenMinutesAway } =
-    useDriverTodayTrips(driver);
+export function DriverTodayTripsContent({ driverTodayTrips: serverDriverTodayTrips }: DriverTodayTripsContentProps) {
+  const {
+    todayLabel,
+    driverTodayTrips,
+    pendingTripsCount,
+    sendingTripId,
+    noticeErrorMessage,
+    notifyClientDriverIsTenMinutesAway,
+  } = useDriverTodayTrips(serverDriverTodayTrips);
 
   return (
     <section className="flex flex-col gap-4">
@@ -34,11 +40,17 @@ export function DriverTodayTripsContent({ driver }: DriverTodayTripsContentProps
               ? "All clients notified. Drive safe!"
               : `${pendingTripsCount} of ${driverTodayTrips.length} pickups waiting for your 10-minute notice.`}
           </p>
+          {noticeErrorMessage ? (
+            <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
+              {noticeErrorMessage}
+            </p>
+          ) : null}
           <ul className="flex flex-col gap-3">
             {driverTodayTrips.map((driverTodayTrip) => (
               <DriverTripCard
                 key={driverTodayTrip.trip.id}
                 driverTodayTrip={driverTodayTrip}
+                isSendingNotice={sendingTripId === driverTodayTrip.trip.id}
                 onTenMinutesAwayPressed={notifyClientDriverIsTenMinutesAway}
               />
             ))}

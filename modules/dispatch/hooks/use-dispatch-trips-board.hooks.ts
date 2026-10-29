@@ -1,31 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { findNoticeForTrip } from "@/modules/notifications/utils/notifications-notice-builder.utils";
-import { findMockDriverById, mockDrivers } from "@/modules/shared/data/shared-drivers-mock.data";
-import { useSharedMockDatabase } from "@/modules/shared/hooks/use-shared-mock-database.hooks";
 import {
+  combineDateAndTimeInputs,
   formatLongDate,
   isSameCalendarDay,
   sortByScheduledTime,
   toDateInputValue,
 } from "@/modules/shared/utils/shared-date-format.utils";
-import { assignDriverToTrip, resetDispatchDemoData } from "../services/dispatch-trips.services";
-import type { DispatchBoardSummary, DispatchTripRow } from "../types/dispatch.types";
+import { assignDriverToTripAction, resetDispatchDemoDataAction } from "../actions/dispatch-trips.actions";
+import type { DispatchBoardData, DispatchBoardSummary, DispatchTripRow } from "../types/dispatch.types";
 
-// Mounted only on the client (behind SharedMockDatabaseGate), so `new Date()` is safe here.
-export function useDispatchTripsBoard() {
-  const { trips, notices } = useSharedMockDatabase();
+// Dates are formatted in the operation's time zone, so server and browser render the same text.
+export function useDispatchTripsBoard({ drivers, trips, notices }: DispatchBoardData) {
   const [selectedDateInputValue, setSelectedDateInputValue] = useState(() => toDateInputValue(new Date()));
+  const [boardErrorMessage, setBoardErrorMessage] = useState<string | null>(null);
+  const [isResettingDemoData, startResettingDemoData] = useTransition();
+  const [, startAssigningDriver] = useTransition();
 
-  const selectedDate = new Date(`${selectedDateInputValue}T00:00`);
+  // Noon avoids landing on the previous day when the date is read in another time zone.
+  const selectedDate = new Date(combineDateAndTimeInputs(selectedDateInputValue, "12:00"));
   const isSelectedDateToday = selectedDateInputValue === toDateInputValue(new Date());
 
   const selectedDayTripRows: DispatchTripRow[] = sortByScheduledTime(
     trips.filter((trip) => isSameCalendarDay(trip.scheduledAt, selectedDate)),
   ).map((trip) => ({
     trip,
-    assignedDriver: findMockDriverById(trip.driverId),
+    assignedDriver: drivers.find((driver) => driver.id === trip.driverId) ?? null,
     notice: findNoticeForTrip(notices, trip.id),
   }));
 
@@ -36,21 +38,30 @@ export function useDispatchTripsBoard() {
   };
 
   function assignDriverFromBoard(tripId: string, driverId: string) {
-    assignDriverToTrip(tripId, driverId || null);
+    setBoardErrorMessage(null);
+    startAssigningDriver(async () => {
+      const { errorMessage } = await assignDriverToTripAction(tripId, driverId || null);
+      setBoardErrorMessage(errorMessage);
+    });
   }
 
   function resetDemoData() {
-    resetDispatchDemoData();
-    setSelectedDateInputValue(toDateInputValue(new Date()));
+    setBoardErrorMessage(null);
+    startResettingDemoData(async () => {
+      await resetDispatchDemoDataAction();
+      setSelectedDateInputValue(toDateInputValue(new Date()));
+    });
   }
 
   return {
-    availableDrivers: mockDrivers,
+    availableDrivers: drivers,
     selectedDateInputValue,
     selectedDateLabel: isSelectedDateToday ? "Today" : formatLongDate(selectedDate),
     todayLabel: formatLongDate(new Date()),
     selectedDayTripRows,
     selectedDaySummary,
+    boardErrorMessage,
+    isResettingDemoData,
     changeSelectedDate: setSelectedDateInputValue,
     assignDriverFromBoard,
     resetDemoData,

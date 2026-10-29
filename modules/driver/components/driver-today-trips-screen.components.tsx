@@ -1,15 +1,15 @@
 import { DriverAuthSignOutButton } from "@/modules/driver-auth/components/driver-auth-sign-out-button.components";
 import { CarIcon } from "@/modules/shared/components/shared-icons.components";
-import { SharedLoadingSkeleton } from "@/modules/shared/components/shared-loading-skeleton.components";
-import { SharedMockDatabaseGate } from "@/modules/shared/components/shared-mock-database-gate.components";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
+import type { DriverTodayTrip } from "../types/driver.types";
 import { DriverTodayTripsContent } from "./driver-today-trips-content.components";
 
 type DriverTodayTripsScreenProps = {
   driver: Driver;
+  driverTodayTrips: DriverTodayTrip[];
 };
 
-export function DriverTodayTripsScreen({ driver }: DriverTodayTripsScreenProps) {
+export function DriverTodayTripsScreen({ driver, driverTodayTrips }: DriverTodayTripsScreenProps) {
   const { color, make, model, plate } = driver.vehicle;
 
   return (
@@ -27,9 +27,7 @@ export function DriverTodayTripsScreen({ driver }: DriverTodayTripsScreenProps) 
       </header>
 
       <div className="flex-1 overflow-y-auto px-5 py-6">
-        <SharedMockDatabaseGate fallback={<SharedLoadingSkeleton rows={2} />}>
-          <DriverTodayTripsContent driver={driver} />
-        </SharedMockDatabaseGate>
+        <DriverTodayTripsContent driverTodayTrips={driverTodayTrips} />
       </div>
     </>
   );
