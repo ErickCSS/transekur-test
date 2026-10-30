@@ -16,6 +16,14 @@ export type DispatchTripRow = {
   trip: Trip;
   assignedDriver: Driver | null;
   notice: Notice | null;
+  // Shown before the server confirms it (optimistic row).
+  isSaving: boolean;
+};
+
+export type DispatchTripConfirmation = {
+  message: string;
+  // Set when the service is for another day, so the board can jump there on request.
+  otherDayInputValue: string | null;
 };
 
 export type DispatchBoardSummary = {

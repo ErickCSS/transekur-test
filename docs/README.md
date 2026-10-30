@@ -1,30 +1,31 @@
 # Docs — Driver 10 minutes away
 
-Documentación viva del proyecto. Todo dividido por tipo para encontrarlo rápido.
+Living project documentation, split by type.
 
-| Carpeta | Qué contiene |
+| Folder | Contents |
 | --- | --- |
-| [decisions/](decisions/) | Decisiones de arquitectura (ADR). Una decisión por archivo, numeradas. |
-| [architecture/](architecture/) | Convenciones de módulos, modelo de datos y flujos. |
-| [design/](design/) | Especificación de cada pantalla. |
-| [logbook/](logbook/) | Bitácora: una entrada por sesión de trabajo. |
-| [ai-usage.md](ai-usage.md) | Herramientas (incluida IA) usadas — lo pide la prueba. |
-| [one-pager.md](one-pager.md) | Plan de una página para el evaluador: qué se construye, supuestos, fuera de alcance y preguntas. |
+| [decisions/](decisions/) | Architecture decisions (ADR). One decision per file, numbered. |
+| [architecture/](architecture/) | Module conventions, data model and flows. |
+| [design/](design/) | What each screen shows. |
+| [logbook/](logbook/) | One entry per work session. |
+| [ai-usage.md](ai-usage.md) | Tools used (AI included), as the test asks. |
+| [one-pager.md](one-pager.md) | One-page plan: what gets built, assumptions, out of scope and questions. |
 
-## Decisiones
+## Decisions
 
-1. [0001 — Una app, tres módulos](decisions/0001-una-app-tres-modulos.md)
-2. [0002 — Supabase como backend](decisions/0002-supabase.md)
-3. [0003 — Aviso simulado + link WhatsApp](decisions/0003-aviso-simulado-whatsapp.md)
-4. [0004 — Login del conductor con Supabase Auth](decisions/0004-login-conductor-supabase-auth.md)
-5. [0005 — Convenciones modulares](decisions/0005-convenciones-modulares.md)
-6. [0006 — Diseño primero con base de datos mock](decisions/0006-diseno-primero-con-mock.md)
+1. [0001 — One app, three modules](decisions/0001-one-app-three-modules.md)
+2. [0002 — Supabase as the backend](decisions/0002-supabase.md)
+3. [0003 — Simulated notice + WhatsApp link](decisions/0003-simulated-notice-whatsapp-link.md)
+4. [0004 — Driver login with Supabase Auth](decisions/0004-driver-login-supabase-auth.md)
+5. [0005 — Module conventions](decisions/0005-module-conventions.md)
+6. [0006 — Design first, with a mock database](decisions/0006-design-first-with-mock-data.md) (superseded by 0007)
 7. [0007 — Supabase tables behind server actions](decisions/0007-supabase-tables-server-actions.md)
+8. [0008 — Live updates with a Realtime broadcast](decisions/0008-live-updates-realtime-broadcast.md)
 
-## La prueba (resumen)
+## The test (summary)
 
-1. **Dispatch**: crear un servicio (cliente, teléfono, fecha/hora, punto de recogida) y asignar conductor.
-2. **Driver app** (web móvil): el conductor inicia sesión, ve solo sus servicios del día y toca "10 min away".
-3. **Aviso al cliente**: el cliente recibe un mensaje con nombre del conductor y vehículo. Dispatch ve que salió y a qué hora.
+1. **Dispatch**: create a service (client, phone, date/time, pickup point) and assign a driver.
+2. **Driver app** (mobile web): the driver signs in, sees only their services for today and taps "10 min away".
+3. **Client notice**: the client gets a message with the driver's name and vehicle. Dispatch sees that it went out and when.
 
-Reglas: herramientas libres (decir cuáles), planes gratis, SMS simulado, datos inventados.
+Rules: any tools (say which), free plans, simulated SMS, made-up data.

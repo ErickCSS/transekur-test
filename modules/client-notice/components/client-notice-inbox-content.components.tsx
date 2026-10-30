@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeftIcon, MessageIcon } from "@/modules/shared/components/shared-icons.components";
 import { SharedEmptyState } from "@/modules/shared/components/shared-empty-state.components";
+import { SharedLiveStatus } from "@/modules/shared/components/shared-live-status.components";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
 import { useClientNoticeInbox } from "../hooks/use-client-notice-inbox.hooks";
 import type { ClientNoticeInboxData } from "../types/client-notice.types";
@@ -20,11 +21,14 @@ export function ClientNoticeInboxContent({ inboxData }: ClientNoticeInboxContent
     <>
       <header className="flex flex-col gap-3 border-b border-line bg-surface px-5 pb-4 pt-12">
         <div className="flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
+          <Link href="/" target="_top" className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft">
             <ArrowLeftIcon className="size-4" />
             All apps
           </Link>
-          <span className="text-xs font-semibold uppercase tracking-widest text-accent-strong">Client phone</span>
+          <div className="flex items-center gap-2">
+            <SharedLiveStatus />
+            <span className="text-xs font-semibold uppercase tracking-widest text-accent-strong">Client phone</span>
+          </div>
         </div>
         <label className="flex flex-col gap-1">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Viewing phone of</span>

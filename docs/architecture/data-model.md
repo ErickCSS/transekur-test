@@ -1,34 +1,39 @@
-# Modelo de datos
+# Data model
 
-Mismo modelo en la base mock (Fase 1) y en Supabase (Fase 2).
+Supabase Postgres. Schema in [supabase/migrations/](../../supabase/migrations/). RLS is on in every table with no policies: only the server (service role) reads and writes.
 
 ## `drivers`
-| Campo | Tipo | Nota |
+| Column | Type | Note |
 | --- | --- | --- |
-| id | text / uuid | |
-| auth_email | text | Enlace con Supabase Auth en la fase mock |
-| auth_user_id | uuid | Fase 2, fk `auth.users` |
+| id | uuid | |
+| auth_user_id | uuid | fk `auth.users`, unique. Links the signed-in user to the driver. |
+| auth_email | text | unique, used by the seed script |
 | full_name | text | |
 | phone | text | |
 | vehicle_make, vehicle_model, vehicle_color, vehicle_plate | text | |
 
-## `trips` (en la UI: *services*)
-| Campo | Tipo | Nota |
+## `trips` (in the UI: *services*)
+| Column | Type | Note |
 | --- | --- | --- |
 | id | uuid | |
-| client_name | text | |
-| client_phone | text | Formato internacional, solo dígitos para `wa.me` |
-| pickup_point | text | |
+| client_name | text | not empty |
+| client_phone | text | international format, digits only (10–15), used as-is for `wa.me` |
+| pickup_point | text | not empty |
 | scheduled_at | timestamptz | |
-| driver_id | fk drivers | null = sin asignar |
+| driver_id | fk drivers | null = unassigned |
 | status | enum | `scheduled` · `driver_ten_minutes_away` · `completed` |
 | created_at | timestamptz | |
 
 ## `notices`
-| Campo | Tipo | Nota |
+| Column | Type | Note |
 | --- | --- | --- |
 | id | uuid | |
-| trip_id | fk trips | |
-| message | text | Texto ya armado con la plantilla |
+| trip_id | fk trips | **unique**: one notice per service |
+| driver_id | fk drivers | who sent it |
+| message | text | already filled from the template |
 | whatsapp_link | text | `https://wa.me/...` |
-| sent_at | timestamptz | Lo que ve dispatch |
+| sent_at | timestamptz | what dispatch shows |
+
+## Functions and triggers
+- `send_ten_minutes_away_notice(trip, driver, message, link, time_zone)` → `boolean`. Sets the trip to `driver_ten_minutes_away` and inserts the notice in one transaction, only for the assigned driver, for a service scheduled today in the operation time zone that was not notified yet. Only the service role can run it.
+- `broadcast_board_change()`: triggers on `trips` and `notices` send `board_changed` to the public Realtime channel `board-changes`, with no data.

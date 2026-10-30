@@ -6,13 +6,13 @@ import { createSupabaseAdminClient } from "@/modules/shared/services/shared-supa
 import { noticeColumns, type NoticeRow, type TripRow } from "@/modules/shared/types/shared-database.types";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import { mapNoticeRow, mapTripRow } from "@/modules/shared/utils/shared-database-rows.utils";
-import { getCalendarDayRange, toDateInputValue } from "@/modules/shared/utils/shared-date-format.utils";
-import type { DriverTodayTrip } from "../types/driver.types";
+import { getCalendarDayRange } from "@/modules/shared/utils/shared-date-format.utils";
+import type { DriverTrip } from "../types/driver.types";
 
-// Only the driver's own services scheduled today, in the operation's time zone.
-export async function listDriverTodayTrips(driverId: string): Promise<DriverTodayTrip[]> {
+// Only the driver's own services for one calendar day, in the operation's time zone.
+export async function listDriverTripsForDay(driverId: string, dateInputValue: string): Promise<DriverTrip[]> {
   const supabase = await createSupabaseAdminClient();
-  const { dayStartIso, dayEndIso } = getCalendarDayRange(toDateInputValue(new Date()));
+  const { dayStartIso, dayEndIso } = getCalendarDayRange(dateInputValue);
 
   const { data: tripRows, error: tripsError } = await supabase
     .from("trips")

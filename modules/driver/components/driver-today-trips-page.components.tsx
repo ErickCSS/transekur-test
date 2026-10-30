@@ -2,13 +2,13 @@ import { Suspense } from "react";
 import { getCurrentDriver } from "@/modules/driver-auth/actions/driver-auth.actions";
 import { SharedLoadingSkeleton } from "@/modules/shared/components/shared-loading-skeleton.components";
 import { SharedPhoneFrame } from "@/modules/shared/components/shared-phone-frame.components";
-import { getCurrentDriverTodayTrips } from "../actions/driver-today-trips.actions";
+import { getCurrentDriverTrips } from "../actions/driver-today-trips.actions";
 import { DriverTodayTripsScreen } from "./driver-today-trips-screen.components";
 
 // Reading the session needs the request, so it streams in behind Suspense (cacheComponents).
 async function DriverTodayTripsForSignedInDriver() {
-  const [currentDriver, driverTodayTrips] = await Promise.all([getCurrentDriver(), getCurrentDriverTodayTrips()]);
-  return <DriverTodayTripsScreen driver={currentDriver} driverTodayTrips={driverTodayTrips} />;
+  const [currentDriver, driverTrips] = await Promise.all([getCurrentDriver(), getCurrentDriverTrips()]);
+  return <DriverTodayTripsScreen driver={currentDriver} driverTrips={driverTrips} />;
 }
 
 export function DriverTodayTripsPage() {

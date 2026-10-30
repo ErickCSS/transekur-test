@@ -1,17 +1,19 @@
-import { MapPinIcon, UserIcon } from "@/modules/shared/components/shared-icons.components";
+import { ClockIcon, MapPinIcon, UserIcon } from "@/modules/shared/components/shared-icons.components";
 import { formatTimeOfDay } from "@/modules/shared/utils/shared-date-format.utils";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
-import type { DriverTodayTrip } from "../types/driver.types";
+import type { DriverTrip } from "../types/driver.types";
 import { DriverTenMinutesAwayButton } from "./driver-ten-minutes-away-button.components";
 
 type DriverTripCardProps = {
-  driverTodayTrip: DriverTodayTrip;
+  driverTrip: DriverTrip;
+  // Only today's services can be notified; tomorrow's are shown to plan ahead.
+  canNotify: boolean;
   isSendingNotice: boolean;
   onTenMinutesAwayPressed: (tripId: string) => void;
 };
 
-export function DriverTripCard({ driverTodayTrip, isSendingNotice, onTenMinutesAwayPressed }: DriverTripCardProps) {
-  const { trip, notice } = driverTodayTrip;
+export function DriverTripCard({ driverTrip, canNotify, isSendingNotice, onTenMinutesAwayPressed }: DriverTripCardProps) {
+  const { trip, notice } = driverTrip;
 
   return (
     <li
@@ -36,11 +38,18 @@ export function DriverTripCard({ driverTodayTrip, isSendingNotice, onTenMinutesA
         </p>
       </div>
 
-      <DriverTenMinutesAwayButton
-        notice={notice}
-        isSending={isSendingNotice}
-        onTenMinutesAwayPressed={() => onTenMinutesAwayPressed(trip.id)}
-      />
+      {canNotify ? (
+        <DriverTenMinutesAwayButton
+          notice={notice}
+          isSending={isSendingNotice}
+          onTenMinutesAwayPressed={() => onTenMinutesAwayPressed(trip.id)}
+        />
+      ) : (
+        <p className="flex h-12 items-center justify-center gap-2 rounded-xl bg-canvas text-sm font-medium text-ink-soft">
+          <ClockIcon className="size-4" />
+          You can notify the client on the day
+        </p>
+      )}
     </li>
   );
 }

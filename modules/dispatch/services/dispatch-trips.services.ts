@@ -1,5 +1,5 @@
 import "server-only";
-import { buildTodayTripsSeed } from "@/modules/shared/data/shared-trips-seed.data";
+import { buildDemoTripsSeed } from "@/modules/shared/data/shared-trips-seed.data";
 import { listDrivers } from "@/modules/shared/services/shared-drivers.services";
 import { createSupabaseAdminClient } from "@/modules/shared/services/shared-supabase-admin-client.services";
 import { noticeColumns, type NoticeRow, type TripRow } from "@/modules/shared/types/shared-database.types";
@@ -55,7 +55,7 @@ export async function resetDispatchDemoData() {
   if (deleteError) throw new Error(`Could not clear services: ${deleteError.message}`);
 
   const drivers = await listDrivers();
-  const seedTrips = buildTodayTripsSeed(new Date()).map((tripSeed) => ({
+  const seedTrips = buildDemoTripsSeed(new Date()).map((tripSeed) => ({
     client_name: tripSeed.clientName,
     client_phone: tripSeed.clientPhone,
     pickup_point: tripSeed.pickupPoint,

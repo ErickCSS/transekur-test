@@ -2,10 +2,17 @@
 
 import { useState, useTransition, type ChangeEvent, type FormEvent } from "react";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
-import { combineDateAndTimeInputs, toDateInputValue } from "@/modules/shared/utils/shared-date-format.utils";
+import type { Trip } from "@/modules/shared/types/shared-trip.types";
+import {
+  combineDateAndTimeInputs,
+  formatLongDateFromInputValue,
+  getNextDateInputValue,
+  toDateInputValue,
+} from "@/modules/shared/utils/shared-date-format.utils";
 import { keepOnlyPhoneDigits } from "@/modules/shared/utils/shared-phone-format.utils";
 import { createDispatchTripAction } from "../actions/dispatch-trips.actions";
-import type { DispatchTripFormErrors, DispatchTripFormValues } from "../types/dispatch.types";
+import type { DispatchTripConfirmation, DispatchTripFormErrors, DispatchTripFormValues } from "../types/dispatch.types";
+import { buildOptimisticTrip } from "../utils/dispatch-optimistic-trips.utils";
 
 function buildEmptyDispatchTripFormValues(): DispatchTripFormValues {
   return { clientName: "", clientPhone: "", date: toDateInputValue(new Date()), time: "", pickupPoint: "", driverId: "" };
@@ -21,13 +28,39 @@ function validateDispatchTripForm(formValues: DispatchTripFormValues): DispatchT
   return formErrors;
 }
 
-export function useDispatchTripForm(
-  availableDrivers: Driver[],
-  onTripCreated: (scheduledDateInputValue: string) => void,
-) {
+// Drivers see today's and tomorrow's services; the 10-minute notice only works on the day.
+function buildDriverVisibilityHint(dateInputValue: string) {
+  const todayInputValue = toDateInputValue(new Date());
+  if (!dateInputValue || dateInputValue === todayInputValue) return null;
+  if (dateInputValue === getNextDateInputValue(todayInputValue)) {
+    return "The driver sees it under Tomorrow and notifies the client on the day.";
+  }
+  return "Drivers see a service the day before, and notify the client on the day.";
+}
+
+function buildTripConfirmation(dateInputValue: string, assignedDriver: Driver | undefined): DispatchTripConfirmation {
+  const todayInputValue = toDateInputValue(new Date());
+  if (dateInputValue === todayInputValue) {
+    return {
+      message: assignedDriver
+        ? `Service created and assigned to ${assignedDriver.fullName}. It's in their app now.`
+        : "Service created. Assign a driver from the list.",
+      otherDayInputValue: null,
+    };
+  }
+
+  const dayLabel = formatLongDateFromInputValue(dateInputValue);
+  const isTomorrow = dateInputValue === getNextDateInputValue(todayInputValue);
+  const visibility = isTomorrow
+    ? `${assignedDriver ? assignedDriver.fullName : "The driver"} sees it under Tomorrow in their app.`
+    : "Drivers see it the day before.";
+  return { message: `Service created for ${dayLabel}. ${visibility}`, otherDayInputValue: dateInputValue };
+}
+
+export function useDispatchTripForm(availableDrivers: Driver[], onOptimisticTripCreated: (trip: Trip) => void) {
   const [formValues, setFormValues] = useState(buildEmptyDispatchTripFormValues);
   const [formErrors, setFormErrors] = useState<DispatchTripFormErrors>({});
-  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState<DispatchTripConfirmation | null>(null);
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const [isCreatingTrip, startCreatingTrip] = useTransition();
 
@@ -35,7 +68,7 @@ export function useDispatchTripForm(
     const { name, value } = event.target;
     setFormValues((currentValues) => ({ ...currentValues, [name]: value }));
     setFormErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }));
-    setConfirmationMessage(null);
+    setConfirmation(null);
     setSubmitErrorMessage(null);
   }
 
@@ -45,34 +78,38 @@ export function useDispatchTripForm(
     setFormErrors(validationErrors);
     if (Object.keys(validationErrors).length > 0) return;
 
+    const submittedValues = formValues;
+    const newTrip = {
+      clientName: submittedValues.clientName.trim(),
+      clientPhone: keepOnlyPhoneDigits(submittedValues.clientPhone),
+      pickupPoint: submittedValues.pickupPoint.trim(),
+      scheduledAt: combineDateAndTimeInputs(submittedValues.date, submittedValues.time),
+      driverId: submittedValues.driverId || null,
+    };
+
+    // The board stays on the day being viewed; the new row shows up at once if it belongs there.
+    setConfirmation(null);
+    setSubmitErrorMessage(null);
+    setFormValues({ ...buildEmptyDispatchTripFormValues(), date: submittedValues.date });
     startCreatingTrip(async () => {
-      const { errorMessage } = await createDispatchTripAction({
-        clientName: formValues.clientName.trim(),
-        clientPhone: keepOnlyPhoneDigits(formValues.clientPhone),
-        pickupPoint: formValues.pickupPoint.trim(),
-        scheduledAt: combineDateAndTimeInputs(formValues.date, formValues.time),
-        driverId: formValues.driverId || null,
-      });
+      onOptimisticTripCreated(buildOptimisticTrip(newTrip));
+      const { errorMessage } = await createDispatchTripAction(newTrip);
       if (errorMessage) {
+        setFormValues(submittedValues);
         setSubmitErrorMessage(errorMessage);
         return;
       }
 
-      const assignedDriver = availableDrivers.find((driver) => driver.id === formValues.driverId);
-      setConfirmationMessage(
-        assignedDriver
-          ? `Service created and assigned to ${assignedDriver.fullName}.`
-          : "Service created. Assign a driver from the list.",
-      );
-      onTripCreated(formValues.date);
-      setFormValues({ ...buildEmptyDispatchTripFormValues(), date: formValues.date });
+      const assignedDriver = availableDrivers.find((driver) => driver.id === submittedValues.driverId);
+      setConfirmation(buildTripConfirmation(submittedValues.date, assignedDriver));
     });
   }
 
   return {
     formValues,
     formErrors,
-    confirmationMessage,
+    confirmation,
+    driverVisibilityHint: buildDriverVisibilityHint(formValues.date),
     submitErrorMessage,
     isCreatingTrip,
     updateFormField,

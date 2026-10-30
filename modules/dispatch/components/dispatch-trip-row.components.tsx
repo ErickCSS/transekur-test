@@ -1,4 +1,5 @@
 import { MapPinIcon } from "@/modules/shared/components/shared-icons.components";
+import { SharedStatusBadge } from "@/modules/shared/components/shared-status-badge.components";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import { formatTimeOfDay } from "@/modules/shared/utils/shared-date-format.utils";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
@@ -13,10 +14,15 @@ type DispatchTripRowProps = {
 };
 
 export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }: DispatchTripRowProps) {
-  const { trip, assignedDriver, notice } = tripRow;
+  const { trip, assignedDriver, notice, isSaving } = tripRow;
 
   return (
-    <li className="grid grid-cols-[5.5rem_1fr] gap-x-4 gap-y-3 px-4 py-4 md:grid-cols-[5.5rem_1.1fr_1.3fr_1.2fr_8rem] md:items-center">
+    <li
+      aria-busy={isSaving}
+      className={`grid grid-cols-[5.5rem_1fr] gap-x-4 gap-y-3 px-4 py-4 transition-opacity md:grid-cols-[5.5rem_1.1fr_1.3fr_1.2fr_8rem] md:items-center ${
+        isSaving ? "bg-accent/5 opacity-70" : ""
+      }`}
+    >
       <p className="row-span-2 whitespace-nowrap text-lg font-bold tabular-nums md:row-span-1">{formatTimeOfDay(trip.scheduledAt)}</p>
 
       <div className="min-w-0">
@@ -34,7 +40,7 @@ export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }:
           tripId={trip.id}
           assignedDriverId={trip.driverId}
           availableDrivers={availableDrivers}
-          isLocked={Boolean(notice)}
+          isLocked={Boolean(notice) || isSaving}
           onDriverAssigned={onDriverAssigned}
         />
         {assignedDriver ? (
@@ -46,7 +52,11 @@ export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }:
       </div>
 
       <div className="col-start-2 md:col-start-auto md:justify-self-end">
-        <DispatchNoticeStatusBadge notice={notice} />
+        {isSaving ? (
+          <SharedStatusBadge tone="warning">Saving…</SharedStatusBadge>
+        ) : (
+          <DispatchNoticeStatusBadge notice={notice} />
+        )}
       </div>
     </li>
   );

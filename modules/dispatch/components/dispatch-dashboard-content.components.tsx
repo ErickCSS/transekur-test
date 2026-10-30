@@ -1,6 +1,7 @@
 "use client";
 
 import { SharedButton } from "@/modules/shared/components/shared-button.components";
+import { SharedLiveStatus } from "@/modules/shared/components/shared-live-status.components";
 import { SharedPageHeader } from "@/modules/shared/components/shared-page-header.components";
 import { useDispatchTripsBoard } from "../hooks/use-dispatch-trips-board.hooks";
 import { DispatchSummaryStats } from "./dispatch-summary-stats.components";
@@ -23,6 +24,7 @@ export function DispatchDashboardContent({ boardData }: DispatchDashboardContent
     boardErrorMessage,
     isResettingDemoData,
     changeSelectedDate,
+    addOptimisticNewTrip,
     assignDriverFromBoard,
     resetDemoData,
   } = useDispatchTripsBoard(boardData);
@@ -34,15 +36,22 @@ export function DispatchDashboardContent({ boardData }: DispatchDashboardContent
         title="Pickup board"
         description={todayLabel}
         actions={
-          <SharedButton variant="outline" onClick={resetDemoData} disabled={isResettingDemoData}>
-            {isResettingDemoData ? "Resetting…" : "Reset demo data"}
-          </SharedButton>
+          <>
+            <SharedLiveStatus />
+            <SharedButton variant="outline" onClick={resetDemoData} disabled={isResettingDemoData}>
+              {isResettingDemoData ? "Resetting…" : "Reset demo data"}
+            </SharedButton>
+          </>
         }
       />
 
-      <div className="grid gap-6 lg:grid-cols-[22rem_1fr] lg:items-start">
-        <div className="lg:sticky lg:top-6">
-          <DispatchTripForm availableDrivers={availableDrivers} onTripCreated={changeSelectedDate} />
+      <div className="grid gap-6 xl:grid-cols-[22rem_1fr] xl:items-start">
+        <div className="xl:sticky xl:top-6">
+          <DispatchTripForm
+            availableDrivers={availableDrivers}
+            onOptimisticTripCreated={addOptimisticNewTrip}
+            onShowDay={changeSelectedDate}
+          />
         </div>
 
         <section className="flex flex-col gap-4">

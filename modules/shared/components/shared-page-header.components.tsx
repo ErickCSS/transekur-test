@@ -15,6 +15,7 @@ export function SharedPageHeader({ eyebrow, title, description, actions }: Share
       <div className="flex flex-col gap-1">
         <Link
           href="/"
+          target="_top"
           className="mb-2 inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink"
         >
           <ArrowLeftIcon className="size-4" />

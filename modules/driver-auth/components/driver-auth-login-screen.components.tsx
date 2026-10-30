@@ -7,7 +7,7 @@ export function DriverAuthLoginScreen() {
   return (
     <SharedPhoneFrame>
       <div className="flex flex-1 flex-col px-6 pb-8 pt-12">
-        <Link href="/" className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-soft">
+        <Link href="/" target="_top" className="inline-flex w-fit items-center gap-1.5 text-xs font-semibold text-ink-soft">
           <ArrowLeftIcon className="size-4" />
           All apps
         </Link>

@@ -18,4 +18,4 @@ The client confirmed: dispatch without login, driver login required, one notice 
 
 ## Consequences
 - Components keep the same shape: Server Components load the data behind `Suspense`, client hooks call the actions.
-- Live updates without refresh need Realtime, which needs read policies or a broadcast channel.
+- Live updates use a broadcast channel instead of read policies ([0008](0008-live-updates-realtime-broadcast.md)).

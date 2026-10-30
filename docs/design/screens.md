@@ -1,30 +1,45 @@
-# Pantallas
+# Screens
 
-Interfaz en inglés. Mobile-first. Paleta: tinta oscura (`ink`) + acento ámbar (taxi) + verde para "enviado".
+UI in English. Mobile first. Palette: dark ink (`ink`) + amber accent (taxi) + green for "sent".
 
 ## Home `/`
-- Título del producto y una línea de qué hace.
-- Tres tarjetas grandes: **Dispatch**, **Driver app**, **Client phone**. Cada una con icono, descripción y flecha.
+- Product name and one line about what it does.
+- Three big cards: **Dispatch**, **Driver app**, **Client phone**. Each with icon, description, arrow and an *Open in new tab* link.
+- From `xl` up: **See all three side by side** button → `/split`.
+
+## Side by side `/split`
+- The three apps at once, for reviewing on a computer: Dispatch takes the free width; Driver and Client are drawn as phones.
+- Each pane is the real app in a same-origin iframe, so the driver session, actions and live updates work as in separate tabs. Each pane header has *Open in new tab*.
+- Short hint at the top: create a service → sign in as its driver → tap *I'm 10 min away*.
+- *All apps* links inside a pane open the home in the whole window (`target="_top"`).
+- Below `xl`: a note ("Side by side works best on a computer") with links to open each app in its own tab.
+- Browsers don't let a web page open their own split view (Chrome's `chrome.tabs` split API is for extensions only), so the layout is done by the page.
 
 ## Dispatch `/dispatch`
-- Header con nombre, fecha de hoy y botón *Reset demo data*.
-- Resumen: servicios hoy · asignados · avisos enviados.
-- Formulario **New service**: client name, phone, date, time, pickup point, driver (select con vehículo).
-- Lista **Today's services**: hora, cliente + teléfono, recogida, conductor (o select para asignar si no tiene), estado del aviso (*Not sent* gris / *Sent 14:32* verde).
-- En móvil la lista son tarjetas; en desktop, tabla.
+- Header with name, today's date, **Live** pill and *Reset demo data* button.
+  - The reset loads 6 services for today (8:30, 9:10, 10:30 AM · 2:00, 2:45, 3:30 PM, one of them unassigned) and 3 for tomorrow (8:00, 8:45 AM · 2:30 PM), spread across the three drivers. Pickups are close together so a reviewer can try the notice without waiting hours.
+- Summary for the selected day: services · assigned · notices sent.
+- **New service** form: client name, phone, date, time, pickup point, driver (select with vehicle). Two columns on mid-size screens.
+  - When the date isn't today, an amber hint says when the driver will see it (tomorrow → under *Tomorrow* in their app).
+  - On submit the service appears in the list at once (*Saving…*), the board stays on the same day, and the confirmation says where the service went (*Show that day* for other dates).
+- **Services** list for the selected day: time, client + phone, pickup, driver select (locked once notified), notice status (*Not sent* grey / *Sent 14:32* green).
+- Cards on mobile, a table from `md` up, and the form beside the list from `xl` up.
 
-## Driver `/driver` (login)
-- Pantalla de teléfono: logo, "Driver sign in", email, password, botón *Sign in*. Error inline.
-- Ayuda: cuentas de prueba disponibles (en el README).
+## Driver `/driver` (sign in)
+- Phone frame: logo, "Driver sign in", email, password, *Sign in* button. Inline error.
+- Test accounts are listed in the README.
 
 ## Driver `/driver/services`
-- Saludo con nombre y vehículo del conductor, botón *Sign out*.
-- Lista de servicios **de hoy y del conductor**: hora grande, cliente, recogida.
-- Botón principal ámbar **I'm 10 min away**. Al tocarlo: estado verde *Client notified at 14:32* y botón deshabilitado.
-- Estado vacío: "No services assigned for today".
+- Greeting with the driver's name and vehicle, **Live** pill, *Sign out* button.
+- Tabs **Today (n) | Tomorrow (n)**.
+- **Today**: the driver's services for today — big time, client, pickup. Amber main button **I'm 10 min away**. While sending: *Notifying client…*. Then a green *Client notified at 14:32* state. Empty state: "No services for today".
+- **Tomorrow**: the same cards, read-only, with "You can notify the client on the day", and a summary "First pickup tomorrow at 7:15 AM · 2 pickups" so the driver can plan when to leave. Empty state: "Nothing scheduled for tomorrow yet".
 
 ## Client `/client`
-- Marco de teléfono (en desktop centrado; en móvil pantalla completa).
-- Selector del cliente (simula "de quién es el teléfono").
-- Mensajes tipo chat: texto del aviso + hora + botón *Open in WhatsApp*.
-- Estado vacío: "No messages yet".
+- Phone frame (centered on desktop, full screen on mobile).
+- Client selector (simulates "whose phone this is").
+- Chat-style messages: notice text + time + *Open in WhatsApp* button.
+- Empty state: "No messages yet".
+
+## Errors
+- If the server can't be reached, each route shows "We couldn't reach the server" with *Try again* (`error.tsx`).

@@ -56,6 +56,16 @@ export function getCalendarDayRange(dateInputValue: string) {
   };
 }
 
+// The calendar day after `dateInputValue`, in the operation's time zone.
+export function getNextDateInputValue(dateInputValue: string) {
+  return toDateInputValue(new Date(getCalendarDayRange(dateInputValue).dayEndIso));
+}
+
+// "2026-10-30" → "Friday, October 30". Noon avoids landing on the previous day.
+export function formatLongDateFromInputValue(dateInputValue: string) {
+  return formatLongDate(new Date(combineDateAndTimeInputs(dateInputValue, "12:00")));
+}
+
 export function sortByScheduledTime<T extends { scheduledAt: string }>(items: T[]) {
   return [...items].sort((first, second) => first.scheduledAt.localeCompare(second.scheduledAt));
 }

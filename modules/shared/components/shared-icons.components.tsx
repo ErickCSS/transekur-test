@@ -59,6 +59,24 @@ export function ArrowRightIcon(iconProps: SharedIconProps) {
   );
 }
 
+export function ExternalLinkIcon(iconProps: SharedIconProps) {
+  return (
+    <SharedIconBase {...iconProps}>
+      <path d="M14 4h6v6M20 4l-9 9" />
+      <path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4" />
+    </SharedIconBase>
+  );
+}
+
+export function SplitViewIcon(iconProps: SharedIconProps) {
+  return (
+    <SharedIconBase {...iconProps}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M10 4v16M15 4v16" />
+    </SharedIconBase>
+  );
+}
+
 export function ArrowLeftIcon(iconProps: SharedIconProps) {
   return (
     <SharedIconBase {...iconProps}>

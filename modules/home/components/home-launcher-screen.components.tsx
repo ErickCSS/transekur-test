@@ -1,4 +1,6 @@
-import { ClockIcon } from "@/modules/shared/components/shared-icons.components";
+import Link from "next/link";
+import { buildSharedButtonClassName } from "@/modules/shared/components/shared-button.components";
+import { ClockIcon, SplitViewIcon } from "@/modules/shared/components/shared-icons.components";
 import { homeAppLinks } from "../config/home-app-links.config";
 import { HomeAppCard } from "./home-app-card.components";
 
@@ -14,8 +16,16 @@ export function HomeLauncherScreen() {
           Let clients know their driver is almost there.
         </h1>
         <p className="max-w-xl text-ink-soft">
-          A mini demo of the “driver 10 minutes away” notice. Open each app in its own tab and follow the steps.
+          A mini demo of the “driver 10 minutes away” notice. Open each app in its own tab and follow the steps, or
+          see all three at once.
         </p>
+        {/* Only where the three apps fit side by side. */}
+        <div className="hidden xl:block">
+          <Link href="/split" className={`${buildSharedButtonClassName("ink", "lg")} w-fit`}>
+            <SplitViewIcon />
+            See all three side by side
+          </Link>
+        </div>
       </div>
 
       <nav aria-label="Demo apps" className="grid gap-4 sm:grid-cols-3">

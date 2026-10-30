@@ -1,10 +1,11 @@
-# Herramientas usadas
+# Tools used
 
-| Herramienta | Uso |
+| Tool | Use |
 | --- | --- |
-| Claude Code (Claude Opus 5.5) | Asistente de programación: planificación, estructura modular, código y documentación, siempre revisado y guiado por mí. |
-| Next.js 16 · React 19 · Tailwind CSS 4 | Framework y estilos. |
-| Supabase (plan gratis) | Auth del conductor; base de datos y Realtime en la Fase 2. |
-| pnpm | Gestor de paquetes. |
+| Claude Code (Claude Opus 5.5) | Programming assistant: planning, module structure, code and documentation, always reviewed and directed by me. |
+| Next.js 16 · React 19 · Tailwind CSS 4 | Framework and styles. |
+| Supabase (free plan) | Driver auth, Postgres database and Realtime. |
+| Supabase CLI | Applying the migrations. |
+| pnpm | Package manager. |
 
-Todos los datos (nombres, teléfonos, placas, correos) son inventados.
+All data (names, phones, plates, emails) is made up.

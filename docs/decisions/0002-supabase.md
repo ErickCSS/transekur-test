@@ -1,20 +1,19 @@
-# 0002 — Supabase como backend
+# 0002 — Supabase as the backend
 
-- **Fecha:** 2026-10-27
-- **Estado:** Aceptada
+- **Date:** 2026-10-27
+- **Status:** Accepted
 
-## Contexto
-Las tres pantallas deben verse actualizadas entre sí (el conductor toca "10 min" y dispatch/cliente lo ven). Necesitamos datos persistentes, auth y tiempo real, en plan gratis.
+## Context
+The three screens must stay in sync (the driver taps "10 min away" and dispatch and the client see it). We need persistent data, auth and real time, on a free plan.
 
-## Opciones
-- **Supabase** (Postgres + Auth + Realtime) — elegida.
-- Archivo JSON + polling — no persiste en Vercel (serverless).
-- localStorage + BroadcastChannel — solo funciona en un navegador.
+## Options
+- **Supabase** (Postgres + Auth + Realtime) — chosen.
+- JSON file + polling — doesn't persist on Vercel (serverless).
+- localStorage + BroadcastChannel — only works inside one browser.
 
-## Decisión
-Supabase plan gratis. Variables en `.env` (ignorado por git).
+## Decision
+Supabase free plan. Keys in `.env` (ignored by git; see `.env.example`).
 
-## Consecuencias
-- Paquetes `@supabase/supabase-js` y `@supabase/ssr` (sesión en cookies).
-- Escrituras solo desde server actions; Realtime para refrescar pantallas.
-- Mientras validamos el diseño, servicios y avisos viven en una base mock (ver [0006](0006-diseno-primero-con-mock.md)); el login ya es real.
+## Consequences
+- Packages `@supabase/supabase-js` and `@supabase/ssr` (session in cookies).
+- Writes only from server actions ([0007](0007-supabase-tables-server-actions.md)); Realtime keeps the screens fresh ([0008](0008-live-updates-realtime-broadcast.md)).
