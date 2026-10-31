@@ -5,19 +5,13 @@ export type DispatchOptimisticTripChange =
   | { type: "create"; trip: Trip }
   | { type: "assign"; tripId: string; driverId: string | null };
 
-const optimisticTripIdPrefix = "optimistic-";
-
+// Same id the server will save, so the row keeps its identity (and its animation) when the real one arrives.
 export function buildOptimisticTrip(newTrip: NewTripInput): Trip {
   return {
     ...newTrip,
-    id: `${optimisticTripIdPrefix}${crypto.randomUUID()}`,
     status: "scheduled",
     createdAt: new Date().toISOString(),
   };
-}
-
-export function isOptimisticTrip(trip: Trip) {
-  return trip.id.startsWith(optimisticTripIdPrefix);
 }
 
 export function applyOptimisticTripChange(currentTrips: Trip[], change: DispatchOptimisticTripChange): Trip[] {

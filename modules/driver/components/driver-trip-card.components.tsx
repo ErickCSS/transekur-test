@@ -16,7 +16,7 @@ export function DriverTripCard({ driverTrip, canNotify, isSendingNotice, onTenMi
   const { trip, notice } = driverTrip;
 
   return (
-    <li
+    <article
       className={`flex flex-col gap-4 rounded-2xl border p-4 ${
         notice ? "border-line bg-canvas/60" : "border-line bg-surface shadow-sm"
       }`}
@@ -50,6 +50,6 @@ export function DriverTripCard({ driverTrip, canNotify, isSendingNotice, onTenMi
           You can notify the client on the day
         </p>
       )}
-    </li>
+    </article>
   );
 }

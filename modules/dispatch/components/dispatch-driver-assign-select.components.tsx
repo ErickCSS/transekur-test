@@ -1,4 +1,11 @@
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/modules/shared/components/ui/select";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
+import { cn } from "@/modules/shared/utils/shared-class-names.utils";
+import {
+  fromDriverSelectValue,
+  toDriverSelectValue,
+  unassignedDriverSelectValue,
+} from "../config/dispatch-driver-select.config";
 
 type DispatchDriverAssignSelectProps = {
   tripId: string;
@@ -15,24 +22,31 @@ export function DispatchDriverAssignSelect({
   isLocked,
   onDriverAssigned,
 }: DispatchDriverAssignSelectProps) {
-  const isUnassigned = !assignedDriverId;
+  const assignedDriver = availableDrivers.find((driver) => driver.id === assignedDriverId);
+  const isUnassigned = !assignedDriver;
 
   return (
-    <select
-      aria-label="Assigned driver"
-      value={assignedDriverId ?? ""}
+    <Select
+      value={toDriverSelectValue(assignedDriverId)}
       disabled={isLocked}
-      onChange={(event) => onDriverAssigned(tripId, event.target.value)}
-      className={`h-9 w-full rounded-lg border px-2 text-sm font-medium outline-none transition-colors focus:border-ink disabled:cursor-not-allowed disabled:opacity-70 ${
-        isUnassigned ? "border-accent bg-accent/10 text-ink" : "border-line bg-surface text-ink"
-      }`}
+      onValueChange={(selectValue) => onDriverAssigned(tripId, fromDriverSelectValue(selectValue))}
     >
-      <option value="">Assign driver…</option>
-      {availableDrivers.map((driver) => (
-        <option key={driver.id} value={driver.id}>
-          {driver.fullName}
-        </option>
-      ))}
-    </select>
+      <SelectTrigger
+        size="sm"
+        aria-label="Assigned driver"
+        className={cn("font-medium", isUnassigned && "border-accent bg-accent/10")}
+      >
+        {/* Text given up front so the first paint isn't blank (Radix fills it in after hydration). */}
+        <SelectValue>{assignedDriver?.fullName ?? "Assign driver…"}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value={unassignedDriverSelectValue}>Assign driver…</SelectItem>
+        {availableDrivers.map((driver) => (
+          <SelectItem key={driver.id} value={driver.id}>
+            {driver.fullName}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

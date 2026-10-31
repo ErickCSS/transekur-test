@@ -14,23 +14,27 @@ import type { DispatchActionResult } from "../types/dispatch.types";
 
 // Dispatch has no login in this test (agreed with the client), so these actions only validate input.
 
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export async function getDispatchBoardData() {
   return listDispatchBoardData();
 }
 
 export async function createDispatchTripAction(newTrip: NewTripInput): Promise<DispatchActionResult> {
+  const id = String(newTrip.id ?? "");
   const clientName = String(newTrip.clientName ?? "").trim();
   const clientPhone = keepOnlyPhoneDigits(String(newTrip.clientPhone ?? ""));
   const pickupPoint = String(newTrip.pickupPoint ?? "").trim();
   const scheduledAt = new Date(String(newTrip.scheduledAt ?? ""));
   const driverId = newTrip.driverId ? String(newTrip.driverId) : null;
 
+  if (!uuidPattern.test(id)) return { errorMessage: "Something went wrong. Try again." };
   if (!clientName || !pickupPoint) return { errorMessage: "Client name and pickup point are required." };
   if (clientPhone.length < 10 || clientPhone.length > 15) return { errorMessage: "Enter a phone with country code." };
   if (Number.isNaN(scheduledAt.getTime())) return { errorMessage: "Pick a valid date and time." };
   if (driverId && !(await findDriverById(driverId))) return { errorMessage: "That driver does not exist." };
 
-  await createDispatchTrip({ clientName, clientPhone, pickupPoint, scheduledAt: scheduledAt.toISOString(), driverId });
+  await createDispatchTrip({ id, clientName, clientPhone, pickupPoint, scheduledAt: scheduledAt.toISOString(), driverId });
   refresh();
   return { errorMessage: null };
 }

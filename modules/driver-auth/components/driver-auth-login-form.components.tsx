@@ -2,6 +2,7 @@
 
 import { SharedButton } from "@/modules/shared/components/shared-button.components";
 import { SharedTextField } from "@/modules/shared/components/shared-form-fields.components";
+import { Alert, AlertDescription } from "@/modules/shared/components/ui/alert";
 import { useDriverAuthLoginForm } from "../hooks/use-driver-auth-login-form.hooks";
 
 export function DriverAuthLoginForm() {
@@ -28,9 +29,9 @@ export function DriverAuthLoginForm() {
         required
       />
       {errorMessage ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-          {errorMessage}
-        </p>
+        <Alert variant="destructive" className="animate-in fade-in slide-in-from-top-1">
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
       ) : null}
       <SharedButton type="submit" variant="ink" size="lg" isFullWidth disabled={isSigningIn}>
         {isSigningIn ? "Signing in…" : "Sign in"}

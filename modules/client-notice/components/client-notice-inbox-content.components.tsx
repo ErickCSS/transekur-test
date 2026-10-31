@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeftIcon, MessageIcon } from "@/modules/shared/components/shared-icons.components";
 import { SharedEmptyState } from "@/modules/shared/components/shared-empty-state.components";
 import { SharedLiveStatus } from "@/modules/shared/components/shared-live-status.components";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/modules/shared/components/ui/select";
+import { sharedMessageBubbleMotion, sharedViewSwitchMotion } from "@/modules/shared/config/shared-motion.config";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
 import { useClientNoticeInbox } from "../hooks/use-client-notice-inbox.hooks";
 import type { ClientNoticeInboxData } from "../types/client-notice.types";
@@ -14,8 +17,14 @@ type ClientNoticeInboxContentProps = {
 };
 
 export function ClientNoticeInboxContent({ inboxData }: ClientNoticeInboxContentProps) {
-  const { clientContacts, selectedClientPhone, selectedClientContact, selectedClientNotices, selectClientPhone } =
-    useClientNoticeInbox(inboxData);
+  const {
+    clientContacts,
+    selectedClientPhone,
+    selectedClientContact,
+    selectedClientNotices,
+    messagesScrollRef,
+    selectClientPhone,
+  } = useClientNoticeInbox(inboxData);
 
   return (
     <>
@@ -30,39 +39,56 @@ export function ClientNoticeInboxContent({ inboxData }: ClientNoticeInboxContent
             <span className="text-xs font-semibold uppercase tracking-widest text-accent-strong">Client phone</span>
           </div>
         </div>
-        <label className="flex flex-col gap-1">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">Viewing phone of</span>
-          <select
-            value={selectedClientPhone}
-            onChange={(event) => selectClientPhone(event.target.value)}
-            className="h-10 rounded-xl border border-line bg-canvas px-3 text-sm font-semibold outline-none focus:border-ink"
-          >
-            {clientContacts.map((clientContact) => (
-              <option key={clientContact.clientPhone} value={clientContact.clientPhone}>
-                {clientContact.clientName} · {formatPhoneForDisplay(clientContact.clientPhone)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="flex flex-col gap-1">
+          <span id="client-phone-label" className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
+            Viewing phone of
+          </span>
+          <Select value={selectedClientPhone} onValueChange={selectClientPhone}>
+            <SelectTrigger aria-labelledby="client-phone-label" className="h-10 bg-canvas font-semibold">
+              {/* Text given up front so the first paint isn't blank (Radix fills it in after hydration). */}
+              <SelectValue placeholder="No clients yet">
+                {selectedClientContact
+                  ? `${selectedClientContact.clientName} · ${formatPhoneForDisplay(selectedClientContact.clientPhone)}`
+                  : null}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent className="max-h-72">
+              {clientContacts.map((clientContact) => (
+                <SelectItem key={clientContact.clientPhone} value={clientContact.clientPhone}>
+                  {clientContact.clientName} · {formatPhoneForDisplay(clientContact.clientPhone)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </header>
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto bg-[#ece9e1] px-4 py-5">
+      <div ref={messagesScrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto bg-[#ece9e1] px-4 py-5">
         <p className="self-center rounded-full bg-surface/70 px-3 py-1 text-[11px] font-semibold text-ink-soft">
           Pickup notices
         </p>
-        {selectedClientNotices.length === 0 ? (
-          <SharedEmptyState
-            icon={<MessageIcon />}
-            title="No messages yet"
-            description={`${selectedClientContact?.clientName ?? "This client"} will get a message here when the driver is 10 minutes away.`}
-          />
-        ) : (
-          <ul className="flex flex-col gap-4">
-            {selectedClientNotices.map((notice) => (
-              <ClientNoticeMessageBubble key={notice.id} notice={notice} />
-            ))}
-          </ul>
-        )}
+        {/* Changing phones fades the conversation in; a message that arrives live pops in on its own. */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={selectedClientPhone} {...sharedViewSwitchMotion}>
+            {selectedClientNotices.length === 0 ? (
+              <SharedEmptyState
+                icon={<MessageIcon />}
+                title="No messages yet"
+                description={`${selectedClientContact?.clientName ?? "This client"} will get a message here when the driver is 10 minutes away.`}
+              />
+            ) : (
+              <ul className="flex flex-col gap-4">
+                <AnimatePresence initial={false}>
+                  {selectedClientNotices.map((notice) => (
+                    <motion.li key={notice.id} className="flex max-w-[85%] flex-col self-start" {...sharedMessageBubbleMotion}>
+                      <ClientNoticeMessageBubble notice={notice} />
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </>
   );

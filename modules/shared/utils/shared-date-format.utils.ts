@@ -66,6 +66,35 @@ export function formatLongDateFromInputValue(dateInputValue: string) {
   return formatLongDate(new Date(combineDateAndTimeInputs(dateInputValue, "12:00")));
 }
 
+// The calendar works with local Dates; a YYYY-MM-DD value is only a calendar day, so local midnight keeps it the same day.
+export function parseDateInputValue(dateInputValue: string) {
+  const [year, month, day] = dateInputValue.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function toDateInputValueFromLocalDate(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export type TimeSlotOption = { value: string; label: string };
+
+// "06:00" … "23:45" every `stepMinutes`, labelled like the rest of the app ("02:30 PM").
+export function buildTimeSlotOptions(stepMinutes = 15, firstHour = 6): TimeSlotOption[] {
+  const timeSlotOptions: TimeSlotOption[] = [];
+  for (let minutesOfDay = firstHour * 60; minutesOfDay < 24 * 60; minutesOfDay += stepMinutes) {
+    const hours = Math.floor(minutesOfDay / 60);
+    const minutes = String(minutesOfDay % 60).padStart(2, "0");
+    const twelveHour = String(hours % 12 === 0 ? 12 : hours % 12).padStart(2, "0");
+    timeSlotOptions.push({
+      value: `${String(hours).padStart(2, "0")}:${minutes}`,
+      label: `${twelveHour}:${minutes} ${hours < 12 ? "AM" : "PM"}`,
+    });
+  }
+  return timeSlotOptions;
+}
+
 export function sortByScheduledTime<T extends { scheduledAt: string }>(items: T[]) {
   return [...items].sort((first, second) => first.scheduledAt.localeCompare(second.scheduledAt));
 }

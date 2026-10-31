@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from "motion/react";
+import { sharedValuePopMotion } from "@/modules/shared/config/shared-motion.config";
 import type { DispatchBoardSummary } from "../types/dispatch.types";
 
 type DispatchSummaryStatsProps = {
@@ -16,7 +18,14 @@ export function DispatchSummaryStats({ summary }: DispatchSummaryStatsProps) {
       {summaryStats.map((summaryStat) => (
         <div key={summaryStat.label} className="rounded-2xl border border-line bg-surface px-4 py-3">
           <dt className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{summaryStat.label}</dt>
-          <dd className="mt-1 text-2xl font-bold tabular-nums">{summaryStat.value}</dd>
+          {/* The number pops when it changes (a new service, a notice sent). */}
+          <dd className="mt-1 text-2xl font-bold tabular-nums">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span key={summaryStat.value} className="inline-block" {...sharedValuePopMotion}>
+                {summaryStat.value}
+              </motion.span>
+            </AnimatePresence>
+          </dd>
         </div>
       ))}
     </dl>

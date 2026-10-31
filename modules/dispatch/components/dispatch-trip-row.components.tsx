@@ -1,6 +1,9 @@
+import { AnimatePresence, motion } from "motion/react";
 import { MapPinIcon } from "@/modules/shared/components/shared-icons.components";
 import { SharedStatusBadge } from "@/modules/shared/components/shared-status-badge.components";
+import { sharedStateSwapMotion } from "@/modules/shared/config/shared-motion.config";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
+import { cn } from "@/modules/shared/utils/shared-class-names.utils";
 import { formatTimeOfDay } from "@/modules/shared/utils/shared-date-format.utils";
 import { formatPhoneForDisplay } from "@/modules/shared/utils/shared-phone-format.utils";
 import type { DispatchTripRow as DispatchTripRowData } from "../types/dispatch.types";
@@ -15,13 +18,15 @@ type DispatchTripRowProps = {
 
 export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }: DispatchTripRowProps) {
   const { trip, assignedDriver, notice, isSaving } = tripRow;
+  const noticeStatusKey = isSaving ? "saving" : notice ? "sent" : "not-sent";
 
   return (
-    <li
+    <div
       aria-busy={isSaving}
-      className={`grid grid-cols-[5.5rem_1fr] gap-x-4 gap-y-3 px-4 py-4 transition-opacity md:grid-cols-[5.5rem_1.1fr_1.3fr_1.2fr_8rem] md:items-center ${
-        isSaving ? "bg-accent/5 opacity-70" : ""
-      }`}
+      className={cn(
+        "grid grid-cols-[5.5rem_1fr] gap-x-4 gap-y-3 px-4 py-4 transition-colors duration-500 md:grid-cols-[5.5rem_1fr_1.2fr_1.5fr_7.5rem] md:items-center",
+        isSaving && "bg-accent/10",
+      )}
     >
       <p className="row-span-2 whitespace-nowrap text-lg font-bold tabular-nums md:row-span-1">{formatTimeOfDay(trip.scheduledAt)}</p>
 
@@ -35,7 +40,7 @@ export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }:
         <span className="line-clamp-2">{trip.pickupPoint}</span>
       </p>
 
-      <div className="col-start-2 flex flex-col gap-1 md:col-start-auto">
+      <div className="col-start-2 flex min-w-0 flex-col gap-1 md:col-start-auto">
         <DispatchDriverAssignSelect
           tripId={trip.id}
           assignedDriverId={trip.driverId}
@@ -52,12 +57,16 @@ export function DispatchTripRow({ tripRow, availableDrivers, onDriverAssigned }:
       </div>
 
       <div className="col-start-2 md:col-start-auto md:justify-self-end">
-        {isSaving ? (
-          <SharedStatusBadge tone="warning">Saving…</SharedStatusBadge>
-        ) : (
-          <DispatchNoticeStatusBadge notice={notice} />
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div key={noticeStatusKey} {...sharedStateSwapMotion}>
+            {isSaving ? (
+              <SharedStatusBadge tone="warning">Saving…</SharedStatusBadge>
+            ) : (
+              <DispatchNoticeStatusBadge notice={notice} />
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </li>
+    </div>
   );
 }

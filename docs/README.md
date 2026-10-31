@@ -21,6 +21,7 @@ Living project documentation, split by type.
 6. [0006 — Design first, with a mock database](decisions/0006-design-first-with-mock-data.md) (superseded by 0007)
 7. [0007 — Supabase tables behind server actions](decisions/0007-supabase-tables-server-actions.md)
 8. [0008 — Live updates with a Realtime broadcast](decisions/0008-live-updates-realtime-broadcast.md)
+9. [0009 — shadcn/ui for base components, Motion for live animations](decisions/0009-shadcn-ui-and-motion.md)
 
 ## The test (summary)
 

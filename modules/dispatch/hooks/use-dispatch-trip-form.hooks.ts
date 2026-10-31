@@ -4,6 +4,7 @@ import { useState, useTransition, type ChangeEvent, type FormEvent } from "react
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import type { Trip } from "@/modules/shared/types/shared-trip.types";
 import {
+  buildTimeSlotOptions,
   combineDateAndTimeInputs,
   formatLongDateFromInputValue,
   getNextDateInputValue,
@@ -11,8 +12,16 @@ import {
 } from "@/modules/shared/utils/shared-date-format.utils";
 import { keepOnlyPhoneDigits } from "@/modules/shared/utils/shared-phone-format.utils";
 import { createDispatchTripAction } from "../actions/dispatch-trips.actions";
+import {
+  fromDriverSelectValue,
+  toDriverSelectValue,
+  unassignedDriverSelectValue,
+} from "../config/dispatch-driver-select.config";
 import type { DispatchTripConfirmation, DispatchTripFormErrors, DispatchTripFormValues } from "../types/dispatch.types";
 import { buildOptimisticTrip } from "../utils/dispatch-optimistic-trips.utils";
+
+// Pickups every 15 minutes, from 6:00 AM.
+const timeSlotOptions = buildTimeSlotOptions(15);
 
 function buildEmptyDispatchTripFormValues(): DispatchTripFormValues {
   return { clientName: "", clientPhone: "", date: toDateInputValue(new Date()), time: "", pickupPoint: "", driverId: "" };
@@ -64,12 +73,16 @@ export function useDispatchTripForm(availableDrivers: Driver[], onOptimisticTrip
   const [submitErrorMessage, setSubmitErrorMessage] = useState<string | null>(null);
   const [isCreatingTrip, startCreatingTrip] = useTransition();
 
-  function updateFormField(event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
-    const { name, value } = event.target;
-    setFormValues((currentValues) => ({ ...currentValues, [name]: value }));
-    setFormErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }));
+  function setFormFieldValue(fieldName: keyof DispatchTripFormValues, value: string) {
+    setFormValues((currentValues) => ({ ...currentValues, [fieldName]: value }));
+    setFormErrors((currentErrors) => ({ ...currentErrors, [fieldName]: undefined }));
     setConfirmation(null);
     setSubmitErrorMessage(null);
+  }
+
+  // Text inputs; the date picker and the selects call setFormFieldValue with their value.
+  function updateFormField(event: ChangeEvent<HTMLInputElement>) {
+    setFormFieldValue(event.target.name as keyof DispatchTripFormValues, event.target.value);
   }
 
   function submitDispatchTripForm(event: FormEvent<HTMLFormElement>) {
@@ -80,6 +93,7 @@ export function useDispatchTripForm(availableDrivers: Driver[], onOptimisticTrip
 
     const submittedValues = formValues;
     const newTrip = {
+      id: crypto.randomUUID(),
       clientName: submittedValues.clientName.trim(),
       clientPhone: keepOnlyPhoneDigits(submittedValues.clientPhone),
       pickupPoint: submittedValues.pickupPoint.trim(),
@@ -112,7 +126,20 @@ export function useDispatchTripForm(availableDrivers: Driver[], onOptimisticTrip
     driverVisibilityHint: buildDriverVisibilityHint(formValues.date),
     submitErrorMessage,
     isCreatingTrip,
+    todayInputValue: toDateInputValue(new Date()),
+    timeSlotOptions,
+    driverSelectValue: toDriverSelectValue(formValues.driverId),
+    driverOptions: [
+      { value: unassignedDriverSelectValue, label: "Assign later" },
+      ...availableDrivers.map((driver) => ({
+        value: driver.id,
+        label: `${driver.fullName} — ${driver.vehicle.make} ${driver.vehicle.model}`,
+      })),
+    ],
     updateFormField,
+    changeDate: (dateInputValue: string) => setFormFieldValue("date", dateInputValue),
+    changeTime: (timeInputValue: string) => setFormFieldValue("time", timeInputValue),
+    changeDriver: (selectValue: string) => setFormFieldValue("driverId", fromDriverSelectValue(selectValue)),
     submitDispatchTripForm,
   };
 }

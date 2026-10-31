@@ -12,7 +12,9 @@ export type Trip = {
   createdAt: string;
 };
 
+// The id is made in the browser, so the optimistic row and the saved row are the same row (see docs/decisions/0009).
 export type NewTripInput = {
+  id: string;
   clientName: string;
   clientPhone: string;
   pickupPoint: string;

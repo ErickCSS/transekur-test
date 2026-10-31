@@ -39,6 +39,6 @@ Each feature is a module in `modules/` with its own `components`, `hooks`, `acti
 
 ## Tools used
 
-Next.js 16, React 19, Tailwind CSS 4, Supabase (free plan), Claude Code (AI pair programmer). See [docs/ai-usage.md](docs/ai-usage.md).
+Next.js 16, React 19, Tailwind CSS 4, shadcn/ui (Radix), Motion, Supabase (free plan), Claude Code (AI pair programmer). See [docs/ai-usage.md](docs/ai-usage.md).
 
 All data is made up.

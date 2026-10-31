@@ -13,7 +13,7 @@ import {
 } from "@/modules/shared/utils/shared-date-format.utils";
 import { assignDriverToTripAction, resetDispatchDemoDataAction } from "../actions/dispatch-trips.actions";
 import type { DispatchBoardData, DispatchBoardSummary, DispatchTripRow } from "../types/dispatch.types";
-import { applyOptimisticTripChange, isOptimisticTrip } from "../utils/dispatch-optimistic-trips.utils";
+import { applyOptimisticTripChange } from "../utils/dispatch-optimistic-trips.utils";
 
 // Dates are formatted in the operation's time zone, so server and browser render the same text.
 export function useDispatchTripsBoard({ drivers, trips, notices }: DispatchBoardData) {
@@ -27,6 +27,8 @@ export function useDispatchTripsBoard({ drivers, trips, notices }: DispatchBoard
   // Noon avoids landing on the previous day when the date is read in another time zone.
   const selectedDate = new Date(combineDateAndTimeInputs(selectedDateInputValue, "12:00"));
   const isSelectedDateToday = selectedDateInputValue === toDateInputValue(new Date());
+  // A service is still saving until the server's list includes it.
+  const savedTripIds = new Set(trips.map((trip) => trip.id));
 
   const selectedDayTripRows: DispatchTripRow[] = sortByScheduledTime(
     optimisticTrips.filter((trip) => isSameCalendarDay(trip.scheduledAt, selectedDate)),
@@ -34,7 +36,7 @@ export function useDispatchTripsBoard({ drivers, trips, notices }: DispatchBoard
     trip,
     assignedDriver: drivers.find((driver) => driver.id === trip.driverId) ?? null,
     notice: findNoticeForTrip(notices, trip.id),
-    isSaving: isOptimisticTrip(trip),
+    isSaving: !savedTripIds.has(trip.id),
   }));
 
   const selectedDaySummary: DispatchBoardSummary = {

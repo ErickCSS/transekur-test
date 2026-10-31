@@ -1,6 +1,13 @@
 # Screens
 
-UI in English. Mobile first. Palette: dark ink (`ink`) + amber accent (taxi) + green for "sent".
+UI in English. Mobile first. Palette: dark ink (`ink`) + amber accent (taxi) + green for "sent". Base components from shadcn/ui, styled to this palette.
+
+## Motion
+- Only what arrives or changes while the screen is open is animated; the first paint is not.
+- Respects the system "reduce motion" setting (movement off).
+- Client: a new message comes in as a chat bubble from the sender's corner and the inbox scrolls to it; changing the phone fades the conversation in.
+- Driver: a service that dispatch assigns slides into its time slot with an amber ring that fades out, and the other cards make room; a service reassigned to someone else fades out. *I'm 10 min away* swaps to *Client notified* with a short fade. Changing Today/Tomorrow fades the list in.
+- Dispatch: a new service slides into the list (one row, from *Saving…* to saved); the notice badge swaps from *Not sent* to *Sent*; the summary numbers pop when they change; confirmations and errors open and close smoothly.
 
 ## Home `/`
 - Product name and one line about what it does.
@@ -19,10 +26,10 @@ UI in English. Mobile first. Palette: dark ink (`ink`) + amber accent (taxi) + g
 - Header with name, today's date, **Live** pill and *Reset demo data* button.
   - The reset loads 6 services for today (8:30, 9:10, 10:30 AM · 2:00, 2:45, 3:30 PM, one of them unassigned) and 3 for tomorrow (8:00, 8:45 AM · 2:30 PM), spread across the three drivers. Pickups are close together so a reviewer can try the notice without waiting hours.
 - Summary for the selected day: services · assigned · notices sent.
-- **New service** form: client name, phone, date, time, pickup point, driver (select with vehicle). Two columns on mid-size screens.
+- **New service** form: client name, phone, date (calendar; past days can't be picked), time (every 15 min from 6:00 AM), pickup point, driver (select with vehicle). Two columns on mid-size screens.
   - When the date isn't today, an amber hint says when the driver will see it (tomorrow → under *Tomorrow* in their app).
   - On submit the service appears in the list at once (*Saving…*), the board stays on the same day, and the confirmation says where the service went (*Show that day* for other dates).
-- **Services** list for the selected day: time, client + phone, pickup, driver select (locked once notified), notice status (*Not sent* grey / *Sent 14:32* green).
+- **Services** list for the selected day (pick the day with the calendar button above the list): time, client + phone, pickup, driver select (locked once notified), notice status (*Not sent* grey / *Sent 14:32* green).
 - Cards on mobile, a table from `md` up, and the form beside the list from `xl` up.
 
 ## Driver `/driver` (sign in)

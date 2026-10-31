@@ -1,8 +1,12 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import { SharedButton } from "@/modules/shared/components/shared-button.components";
 import { SharedLiveStatus } from "@/modules/shared/components/shared-live-status.components";
 import { SharedPageHeader } from "@/modules/shared/components/shared-page-header.components";
+import { Alert, AlertDescription } from "@/modules/shared/components/ui/alert";
+import { SharedDatePickerField } from "@/modules/shared/components/shared-date-picker-field.components";
+import { sharedRevealMotion } from "@/modules/shared/config/shared-motion.config";
 import { useDispatchTripsBoard } from "../hooks/use-dispatch-trips-board.hooks";
 import { DispatchSummaryStats } from "./dispatch-summary-stats.components";
 import { DispatchTripForm } from "./dispatch-trip-form.components";
@@ -59,20 +63,22 @@ export function DispatchDashboardContent({ boardData }: DispatchDashboardContent
             <h2 className="text-lg font-bold">
               Services <span className="font-medium text-ink-soft">· {selectedDateLabel}</span>
             </h2>
-            <input
-              type="date"
+            <SharedDatePickerField
               aria-label="Show services for date"
               value={selectedDateInputValue}
-              onChange={(event) => changeSelectedDate(event.target.value)}
-              className="h-9 rounded-lg border border-line bg-surface px-2 text-sm outline-none focus:border-ink"
+              onValueChange={changeSelectedDate}
             />
           </div>
           <DispatchSummaryStats summary={selectedDaySummary} />
-          {boardErrorMessage ? (
-            <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-              {boardErrorMessage}
-            </p>
-          ) : null}
+          <AnimatePresence initial={false}>
+            {boardErrorMessage ? (
+              <motion.div key="board-error" {...sharedRevealMotion}>
+                <Alert variant="destructive">
+                  <AlertDescription>{boardErrorMessage}</AlertDescription>
+                </Alert>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
           <DispatchTripsList
             tripRows={selectedDayTripRows}
             availableDrivers={availableDrivers}

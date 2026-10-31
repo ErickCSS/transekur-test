@@ -18,7 +18,7 @@ export function DispatchNoticeStatusBadge({ notice }: DispatchNoticeStatusBadgeP
   }
 
   return (
-    <span title={notice.message}>
+    <span title={notice.message} className="inline-flex">
       <SharedStatusBadge tone="success">
         <CheckIcon className="size-3.5" />
         Sent {formatTimeOfDay(notice.sentAt)}

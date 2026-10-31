@@ -1,8 +1,14 @@
 "use client";
 
+import { LoaderCircleIcon } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { SharedButton } from "@/modules/shared/components/shared-button.components";
+import { SharedDatePickerField } from "@/modules/shared/components/shared-date-picker-field.components";
 import { SharedSelectField, SharedTextField } from "@/modules/shared/components/shared-form-fields.components";
 import { CheckIcon, ClockIcon } from "@/modules/shared/components/shared-icons.components";
+import { Alert, AlertDescription } from "@/modules/shared/components/ui/alert";
+import { Card } from "@/modules/shared/components/ui/card";
+import { sharedRevealMotion } from "@/modules/shared/config/shared-motion.config";
 import type { Driver } from "@/modules/shared/types/shared-driver.types";
 import type { Trip } from "@/modules/shared/types/shared-trip.types";
 import { useDispatchTripForm } from "../hooks/use-dispatch-trip-form.hooks";
@@ -21,111 +27,117 @@ export function DispatchTripForm({ availableDrivers, onOptimisticTripCreated, on
     driverVisibilityHint,
     submitErrorMessage,
     isCreatingTrip,
+    todayInputValue,
+    timeSlotOptions,
+    driverSelectValue,
+    driverOptions,
     updateFormField,
+    changeDate,
+    changeTime,
+    changeDriver,
     submitDispatchTripForm,
   } = useDispatchTripForm(availableDrivers, onOptimisticTripCreated);
 
   return (
-    <form
-      onSubmit={submitDispatchTripForm}
-      noValidate
-      className="flex flex-col gap-4 rounded-2xl border border-line bg-surface p-5"
-    >
-      <div>
-        <h2 className="text-lg font-bold">New service</h2>
-        <p className="text-sm text-ink-soft">Book a pickup and assign a driver.</p>
-      </div>
+    <Card className="px-5">
+      <form onSubmit={submitDispatchTripForm} noValidate className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-lg font-bold">New service</h2>
+          <p className="text-sm text-ink-soft">Book a pickup and assign a driver.</p>
+        </div>
 
-      {/* Two columns on mid-size screens, where the form sits above the list. */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-        <SharedTextField
-          label="Client name"
-          name="clientName"
-          placeholder="Ana Rodríguez"
-          value={formValues.clientName}
-          onChange={updateFormField}
-          errorMessage={formErrors.clientName}
-        />
-        <SharedTextField
-          label="Client phone"
-          name="clientPhone"
-          type="tel"
-          inputMode="tel"
-          placeholder="+1 809 555 0123"
-          value={formValues.clientPhone}
-          onChange={updateFormField}
-          errorMessage={formErrors.clientPhone}
-        />
-        <div className="grid grid-cols-2 gap-3">
+        {/* Two columns on mid-size screens, where the form sits above the list. */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
           <SharedTextField
-            label="Date"
-            name="date"
-            type="date"
-            value={formValues.date}
+            label="Client name"
+            name="clientName"
+            placeholder="Ana Rodríguez"
+            value={formValues.clientName}
             onChange={updateFormField}
+            errorMessage={formErrors.clientName}
+          />
+          <SharedTextField
+            label="Client phone"
+            name="clientPhone"
+            type="tel"
+            inputMode="tel"
+            placeholder="+1 809 555 0123"
+            value={formValues.clientPhone}
+            onChange={updateFormField}
+            errorMessage={formErrors.clientPhone}
+          />
+          <SharedDatePickerField
+            label="Date"
+            value={formValues.date}
+            onValueChange={changeDate}
+            disabledBefore={todayInputValue}
             errorMessage={formErrors.date}
           />
-          <SharedTextField
+          <SharedSelectField
             label="Time"
-            name="time"
-            type="time"
+            placeholder="Pick a time"
             value={formValues.time}
-            onChange={updateFormField}
+            onValueChange={changeTime}
+            options={timeSlotOptions}
             errorMessage={formErrors.time}
           />
+          <SharedTextField
+            label="Pickup point"
+            name="pickupPoint"
+            placeholder="Las Américas Airport, Terminal B"
+            value={formValues.pickupPoint}
+            onChange={updateFormField}
+            errorMessage={formErrors.pickupPoint}
+          />
+          <SharedSelectField label="Driver" value={driverSelectValue} onValueChange={changeDriver} options={driverOptions} />
         </div>
-        <SharedTextField
-          label="Pickup point"
-          name="pickupPoint"
-          placeholder="Las Américas Airport, Terminal B"
-          value={formValues.pickupPoint}
-          onChange={updateFormField}
-          errorMessage={formErrors.pickupPoint}
-        />
-        <SharedSelectField label="Driver" name="driverId" value={formValues.driverId} onChange={updateFormField}>
-          <option value="">Assign later</option>
-          {availableDrivers.map((driver) => (
-            <option key={driver.id} value={driver.id}>
-              {driver.fullName} — {driver.vehicle.make} {driver.vehicle.model}
-            </option>
-          ))}
-        </SharedSelectField>
-      </div>
 
-      {driverVisibilityHint ? (
-        <p className="flex items-start gap-2 rounded-xl bg-accent/15 px-3 py-2 text-xs font-medium text-ink">
-          <ClockIcon className="mt-px size-4 shrink-0 text-accent-strong" />
-          {driverVisibilityHint}
-        </p>
-      ) : null}
+        <AnimatePresence initial={false}>
+          {driverVisibilityHint ? (
+            <motion.div key="driver-visibility-hint" {...sharedRevealMotion}>
+              <Alert variant="warning" role="note" className="text-xs">
+                <ClockIcon />
+                <AlertDescription>{driverVisibilityHint}</AlertDescription>
+              </Alert>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
 
-      <SharedButton type="submit" variant="accent" size="lg" isFullWidth disabled={isCreatingTrip}>
-        {isCreatingTrip ? "Creating…" : "Create service"}
-      </SharedButton>
+        <SharedButton type="submit" variant="accent" size="lg" isFullWidth disabled={isCreatingTrip}>
+          {isCreatingTrip ? <LoaderCircleIcon className="size-5 animate-spin" /> : null}
+          {isCreatingTrip ? "Creating…" : "Create service"}
+        </SharedButton>
 
-      {submitErrorMessage ? (
-        <p role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm font-medium text-red-700">
-          {submitErrorMessage}
-        </p>
-      ) : null}
+        <AnimatePresence initial={false}>
+          {submitErrorMessage ? (
+            <motion.div key="submit-error" {...sharedRevealMotion}>
+              <Alert variant="destructive">
+                <AlertDescription>{submitErrorMessage}</AlertDescription>
+              </Alert>
+            </motion.div>
+          ) : null}
 
-      {confirmation ? (
-        <div role="status" className="flex items-start gap-2 rounded-xl bg-success-soft px-3 py-2 text-sm font-medium text-success">
-          <CheckIcon className="mt-0.5 size-4 shrink-0" />
-          <p className="flex flex-col items-start gap-1">
-            {confirmation.message}
-            {confirmation.otherDayInputValue ? (
-              <button
-                type="button"
-                onClick={() => onShowDay(confirmation.otherDayInputValue ?? "")}
-                className="font-semibold underline underline-offset-4 hover:text-ink"
-              >
-                Show that day
-              </button>
-            ) : null}
-          </p>
-        </div>
-      ) : null}
-    </form>
+          {confirmation ? (
+            <motion.div key="confirmation" {...sharedRevealMotion}>
+              <Alert variant="success" role="status">
+                <CheckIcon />
+                <AlertDescription>
+                  {confirmation.message}
+                  {confirmation.otherDayInputValue ? (
+                    <button
+                      type="button"
+                      onClick={() => onShowDay(confirmation.otherDayInputValue ?? "")}
+                      className="font-semibold underline underline-offset-4 hover:text-ink"
+                    >
+                      Show that day
+                    </button>
+                  ) : null}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </form>
+    </Card>
   );
 }

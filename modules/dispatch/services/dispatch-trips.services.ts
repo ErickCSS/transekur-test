@@ -27,6 +27,7 @@ export async function listDispatchBoardData(): Promise<DispatchBoardData> {
 export async function createDispatchTrip(newTrip: NewTripInput) {
   const supabase = await createSupabaseAdminClient();
   const { error } = await supabase.from("trips").insert({
+    id: newTrip.id,
     client_name: newTrip.clientName,
     client_phone: newTrip.clientPhone,
     pickup_point: newTrip.pickupPoint,

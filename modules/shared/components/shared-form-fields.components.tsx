@@ -1,54 +1,91 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
-
-const fieldControlClassName =
-  "h-11 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-soft/60 focus:border-ink";
+import { useId, type ComponentProps, type ReactNode } from "react";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 
 type SharedFieldLabelProps = {
+  fieldId: string;
   label: string;
   errorMessage?: string;
   children: ReactNode;
 };
 
-function SharedFieldLabel({ label, errorMessage, children }: SharedFieldLabelProps) {
+function SharedFieldLabel({ fieldId, label, errorMessage, children }: SharedFieldLabelProps) {
   return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{label}</span>
+    <div className="flex min-w-0 flex-col gap-1.5">
+      <Label htmlFor={fieldId} className="text-xs font-semibold uppercase tracking-wide text-ink-soft">
+        {label}
+      </Label>
       {children}
-      {errorMessage ? <span className="text-xs font-medium text-red-600">{errorMessage}</span> : null}
-    </label>
+      {errorMessage ? (
+        <span id={`${fieldId}-error`} className="text-xs font-medium text-red-600">
+          {errorMessage}
+        </span>
+      ) : null}
+    </div>
   );
 }
 
-type SharedTextFieldProps = InputHTMLAttributes<HTMLInputElement> & {
+function buildFieldErrorProps(fieldId: string, errorMessage?: string) {
+  return errorMessage ? { "aria-invalid": true, "aria-describedby": `${fieldId}-error` } : {};
+}
+
+type SharedTextFieldProps = ComponentProps<"input"> & {
   label: string;
   errorMessage?: string;
 };
 
-export function SharedTextField({ label, errorMessage, className = "", ...inputProps }: SharedTextFieldProps) {
+export function SharedTextField({ label, errorMessage, id, ...inputProps }: SharedTextFieldProps) {
+  const generatedId = useId();
+  const fieldId = id ?? generatedId;
+
   return (
-    <SharedFieldLabel label={label} errorMessage={errorMessage}>
-      <input className={`${fieldControlClassName} ${className}`} {...inputProps} />
+    <SharedFieldLabel fieldId={fieldId} label={label} errorMessage={errorMessage}>
+      <Input id={fieldId} {...buildFieldErrorProps(fieldId, errorMessage)} {...inputProps} />
     </SharedFieldLabel>
   );
 }
 
-type SharedSelectFieldProps = SelectHTMLAttributes<HTMLSelectElement> & {
+export type SharedSelectOption = { value: string; label: string };
+
+type SharedSelectFieldProps = {
   label: string;
+  // An empty value shows the placeholder.
+  value: string;
+  onValueChange: (value: string) => void;
+  options: SharedSelectOption[];
+  placeholder?: string;
   errorMessage?: string;
+  disabled?: boolean;
 };
 
 export function SharedSelectField({
   label,
+  value,
+  onValueChange,
+  options,
+  placeholder,
   errorMessage,
-  className = "",
-  children,
-  ...selectProps
+  disabled,
 }: SharedSelectFieldProps) {
+  const fieldId = useId();
+  // Radix fills the value in after hydration; giving the text up front avoids a blank field on first paint.
+  const selectedOptionLabel = options.find((option) => option.value === value)?.label;
+
   return (
-    <SharedFieldLabel label={label} errorMessage={errorMessage}>
-      <select className={`${fieldControlClassName} ${className}`} {...selectProps}>
-        {children}
-      </select>
+    <SharedFieldLabel fieldId={fieldId} label={label} errorMessage={errorMessage}>
+      <Select value={value} onValueChange={onValueChange} disabled={disabled}>
+        <SelectTrigger id={fieldId} {...buildFieldErrorProps(fieldId, errorMessage)}>
+          <SelectValue placeholder={placeholder}>{selectedOptionLabel}</SelectValue>
+        </SelectTrigger>
+        <SelectContent className="max-h-72">
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </SharedFieldLabel>
   );
 }

@@ -37,6 +37,7 @@ client component  →  hook    →  action (writes)  →  service  →  Supabase
 - A client component never imports services or actions directly; it uses its hook.
 - A service doesn't know about React.
 - Code shared between modules lives in `modules/shared`.
+- Exception to the file names: `modules/shared/components/ui/` holds the shadcn/ui primitives with the CLI's own names (`button.tsx`, `tabs.tsx`…), so `pnpm dlx shadcn add` keeps working ([0009](../decisions/0009-shadcn-ui-and-motion.md)). Modules wrap or use them; they don't add logic there.
 - Server Components call read actions directly (there are no hooks on the server).
 
 ## Function names
@@ -51,4 +52,4 @@ Verb + what + context: `createDispatchTrip`, `assignDriverToTrip`, `sendDriverTe
 | `driver` | Driver's services for today and the "10 min away" button. |
 | `client-notice` | Client inbox (phone simulation). |
 | `notifications` | Message template and WhatsApp link. |
-| `shared` | Base UI, domain types, Supabase clients, live updates, date and phone utils. |
+| `shared` | Base UI (shadcn/ui primitives + wrappers), motion presets, domain types, Supabase clients, live updates, date and phone utils. |
